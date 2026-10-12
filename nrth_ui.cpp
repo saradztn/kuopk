@@ -1467,10 +1467,12 @@ static void DrawDumper()
  * s_players is filled through the MTA Lua VM bridge (same channel as the
  * Money Exploit button): a small script enumerates players inside the game
  * and writes "Y<name>" / "N<name>" lines (Y = local player) to
- * C:\NVX\nrth_players.txt (project file-channel convention, cf.
- * SaveDumperEntryToDisk), falling back to the game dir if that fails.
- * C reads the file whenever the Player tab is shown and re-fires the script
- * once per second.
+ * nrth_players.txt — trying BOTH "C:\NVX\..." and the bare relative name,
+ * via BOTH io.open and MTA fileCreate, INDEPENDENTLY (MTA client file APIs
+ * are sandboxed and a "successful" handle may not write where we expect).
+ * C reads the file whenever the Player tab is shown (re-firing the script
+ * once per second) and DISCOVERS where the file landed by scanning C:\NVX,
+ * the process CWD, the MTA install root and the resource tree.
  *
  * The local player is added EXPLICITLY (before the getElementsByType loop)
  * and duplicates are dropped by name, so the local player is guaranteed to
@@ -1516,20 +1518,16 @@ static const char kPlayerListLua[] =
 "local base=ok and res or ('ERR:'..tostring(res))\n"
 "local ioe,fce='io-ok','fc-ok'\n"
 "local paths={'C:\\\\NVX\\\\nrth_players.txt','nrth_players.txt'}\n"
-"local wrote,wpath=false,nil\n"
+"local wrote=false\n"
 "for i=1,#paths do\n"
-" if not wrote then\n"
-"  local path=paths[i]\n"
-"  local full=base..'\\n#W='..path\n"
-"  local okf,f=pcall(function() return io.open(path,'w') end)\n"
-"  if not okf then ioe=tostring(f)\n"
-"  elseif f then f:write(full) f:close() wrote=true wpath=path end\n"
-"  if not wrote then\n"
-"   local ok2,h=pcall(fileCreate,path)\n"
-"   if not ok2 then fce=tostring(h)\n"
-"   elseif h then pcall(fileWrite,h,full,0) pcall(fileClose,h) wrote=true wpath=path end\n"
-"  end\n"
-" end\n"
+" local path=paths[i]\n"
+" local full=base..'\\n#W='..path\n"
+" local okf,f=pcall(function() return io.open(path,'w') end)\n"
+" if not okf then ioe=tostring(f)\n"
+" elseif f then if pcall(function() f:write(full) f:close() end) then wrote=true end end\n"
+" local ok2,h=pcall(function() return fileCreate(path) end)\n"
+" if not ok2 then fce=tostring(h)\n"
+" elseif h then if pcall(function() fileWrite(h,full,0) fileClose(h) end) then wrote=true end end\n"
 "end\n"
 "local report\n"
 "if wrote then report=base\n"
@@ -1556,10 +1554,86 @@ struct PlayerListDiag
     size_t scriptLen = 0;
     bool   cProbeTried = false;
     bool   cProbeOk = false;
+    char   mtaRoot[260] = {0};
+    char   cwd[260] = {0};
 };
 static PlayerListDiag s_plDiag;
 
-static const char *kPlayerListPaths[] = { "C:\\NVX\\nrth_players.txt", "nrth_players.txt" };
+/* MTA client file APIs resolve paths against MTA's own base dir (resource /
+ * install tree), NOT necessarily the process CWD — so the C side DISCOVERS
+ * where the Lua script's file actually landed by scanning a candidate list:
+ *   C:\NVX (C-side probe dir), process CWD, MTA install root (+NVX, +C\NVX
+ *   variants for drive-stripped absolute paths), and the resource tree
+ *   (mods\deathmatch\resources\<res>[\<sub>]) at depth 1..2.
+ * The list is rebuilt every 5 s (resources may load later). */
+static char        s_plCandBuf[64][260];
+static const char *s_plCand[64];
+static int         s_plCandCount = 0;
+static double      s_plCandBuildAt = -1e9;
+
+static void PlayerListAddCand(const char *p)
+{
+    if (s_plCandCount >= 64 || !p || !p[0]) return;
+    for (int i = 0; i < s_plCandCount; ++i)
+        if (strcmp(s_plCandBuf[i], p) == 0) return;
+    strncpy(s_plCandBuf[s_plCandCount], p, 259);
+    s_plCandBuf[s_plCandCount][259] = 0;
+    s_plCand[s_plCandCount++] = s_plCandBuf[s_plCandCount];
+}
+
+static void PlayerListScanResDir(const char *dir, int depth)
+{
+    if (depth > 2) return;
+    char pat[300];
+    snprintf(pat, sizeof(pat), "%s\\*", dir);
+    WIN32_FIND_DATAA fd;
+    HANDLE h = FindFirstFileA(pat, &fd);
+    if (h == INVALID_HANDLE_VALUE) return;
+    do {
+        if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            if (strcmp(fd.cFileName, ".") == 0 || strcmp(fd.cFileName, "..") == 0) continue;
+            char sub[300];
+            snprintf(sub, sizeof(sub), "%s\\%s", dir, fd.cFileName);
+            char f[560];
+            snprintf(f, sizeof(f), "%s\\nrth_players.txt", sub);
+            if (strlen(f) < 260) PlayerListAddCand(f);
+            PlayerListScanResDir(sub, depth + 1);
+        }
+    } while (FindNextFileA(h, &fd));
+    FindClose(h);
+}
+
+static void PlayerListBuildCandidates(double now)
+{
+    if (s_plCandCount > 0 && now - s_plCandBuildAt < 5.0) return;
+    s_plCandCount = 0;
+
+    PlayerListAddCand("C:\\NVX\\nrth_players.txt");
+    PlayerListAddCand("nrth_players.txt"); /* process CWD */
+
+    if (!s_plDiag.mtaRoot[0]) {
+        char exe[260] = {0};
+        GetModuleFileNameA(NULL, exe, 259);
+        char *sl = strrchr(exe, '\\');
+        if (sl) *sl = 0;
+        strncpy(s_plDiag.mtaRoot, exe, sizeof(s_plDiag.mtaRoot) - 1);
+        GetCurrentDirectoryA(259, s_plDiag.cwd);
+        s_plDiag.cwd[259] = 0;
+    }
+    char buf[300];
+    snprintf(buf, sizeof(buf), "%s\\nrth_players.txt", s_plDiag.mtaRoot);
+    PlayerListAddCand(buf);
+    snprintf(buf, sizeof(buf), "%s\\NVX\\nrth_players.txt", s_plDiag.mtaRoot);
+    PlayerListAddCand(buf);
+    snprintf(buf, sizeof(buf), "%s\\C\\NVX\\nrth_players.txt", s_plDiag.mtaRoot);
+    PlayerListAddCand(buf);
+    snprintf(buf, sizeof(buf), "%s\\mods\\deathmatch\\nrth_players.txt", s_plDiag.mtaRoot);
+    PlayerListAddCand(buf);
+    snprintf(buf, sizeof(buf), "%s\\mods\\deathmatch\\resources", s_plDiag.mtaRoot);
+    PlayerListScanResDir(buf, 1);
+
+    s_plCandBuildAt = now;
+}
 
 static void RefreshPlayerListFromFile()
 {
@@ -1570,8 +1644,8 @@ static void RefreshPlayerListFromFile()
     /* Pick the most recently modified existing candidate, then read it. */
     int best = -1;
     ULONGLONG bestT = 0;
-    for (int i = 0; i < 2; ++i) {
-        HANDLE h = CreateFileA(kPlayerListPaths[i], GENERIC_READ,
+    for (int i = 0; i < s_plCandCount; ++i) {
+        HANDLE h = CreateFileA(s_plCand[i], GENERIC_READ,
                                FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
                                OPEN_EXISTING, 0, NULL);
         if (h == INVALID_HANDLE_VALUE) continue;
@@ -1591,7 +1665,7 @@ static void RefreshPlayerListFromFile()
     }
     if (best < 0) return;
 
-    FILE *fp = fopen(kPlayerListPaths[best], "rb");
+    FILE *fp = fopen(s_plCand[best], "rb");
     if (!fp) return;
     fseek(fp, 0, SEEK_END);
     long sz = ftell(fp);
@@ -1602,7 +1676,7 @@ static void RefreshPlayerListFromFile()
         if (fread(&data[0], 1, (size_t)sz, fp) == (size_t)sz) {
             s_plDiag.fileFound = true;
             s_plDiag.fileBytes = sz;
-            strncpy(s_plDiag.filePath, kPlayerListPaths[best], sizeof(s_plDiag.filePath) - 1);
+            strncpy(s_plDiag.filePath, s_plCand[best], sizeof(s_plDiag.filePath) - 1);
         }
     }
     fclose(fp);
@@ -1678,6 +1752,7 @@ static void PlayerListTick()
         s_plDiag.bridgeLastTried = true;
         s_plDiag.bridgeLastTime = now;
     }
+    PlayerListBuildCandidates(now);
     RefreshPlayerListFromFile();
 }
 
@@ -1733,11 +1808,14 @@ static void DrawPlayerTab()
                         s_plDiag.scriptLen);
     ImGui::TextDisabled("cprobe : C:\\NVX write %s",
                         s_plDiag.cProbeTried ? (s_plDiag.cProbeOk ? "OK" : "FAIL") : "not yet");
+    ImGui::TextDisabled("mta    : %s", s_plDiag.mtaRoot[0] ? s_plDiag.mtaRoot : "?");
+    ImGui::TextDisabled("cwd    : %s", s_plDiag.cwd[0] ? s_plDiag.cwd : "?");
     if (s_plDiag.fileFound)
         ImGui::TextDisabled("file   : %s  (%ld B, mtime %s)",
                             s_plDiag.filePath, s_plDiag.fileBytes, s_plDiag.fileMtime);
     else
-        ImGui::TextDisabled("file   : NOT FOUND  (C:\\NVX\\nrth_players.txt + game dir)");
+        ImGui::TextDisabled("file   : NOT FOUND  (scanned %d candidates incl. resources tree)",
+                            s_plCandCount);
     if (s_plDiag.meta[0])  ImGui::TextDisabled("meta   : %s", s_plDiag.meta);
     if (s_plDiag.preview[0]) ImGui::TextDisabled("data   : %s", s_plDiag.preview);
     if (s_plDiag.lastErr[0])
