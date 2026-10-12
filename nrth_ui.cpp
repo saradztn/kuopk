@@ -525,6 +525,7 @@ extern "C" void NrthUI_SyncFeaturesToState(void)
 struct DumperFileEntry {
     std::string name;
     std::string code;
+    std::string resource;  /* resource name parsed from the chunk name */
 };
 struct PacketRow { std::string name; int id; bool blocked; std::string time; };
 struct MarkerRow { std::string name; float x, y, z; };
@@ -567,19 +568,21 @@ extern "C" void NrthUI_OnClientScriptLoaded(const char *chunkName, const char *c
     while (*p == '@' || *p == ':' || *p == '\\' || *p == '/') ++p;
     const char *sep = p;
     while (*sep && *sep != '\\' && *sep != '/') ++sep;
+    std::string resName;
     if (*sep && sep > p && (size_t)(sep - p) < 64) {
-        std::string resName(p, (size_t)(sep - p));
+        resName.assign(p, (size_t)(sep - p));
         NrthUI_OnResourceStarted(resName.c_str());
     }
 
     for (auto &entry : s_dumperEntries) {
         if (entry.name == chunkName) {
             entry.code.assign(code, len);
+            entry.resource = resName;
             return;
         }
     }
     if (s_dumperEntries.size() < 512) {
-        s_dumperEntries.push_back({ chunkName, std::string(code, len) });
+        s_dumperEntries.push_back({ chunkName, std::string(code, len), resName });
     }
 }
 
@@ -770,12 +773,93 @@ static void EnsureLuaVM()
     lua_setglobal(s_L, "log");
 }
 
+/* Bounded substring search (the buffer may not be NUL-terminated). */
+static bool BufferContains(const char *buf, size_t len, const char *needle, size_t nlen)
+{
+    if (nlen == 0 || len < nlen) return false;
+    for (size_t i = 0; i + nlen <= len; ++i)
+        if (memcmp(buf + i, needle, nlen) == 0) return true;
+    return false;
+}
+
+/*
+ * Build a sandbox wrapper that executes the user's code inside the target
+ * MTA Lua VM WITHOUT corrupting the resource's logic:
+ *
+ *   - the user chunk runs with a private environment:
+ *       writes  -> the sandbox table (never the resource globals)
+ *       reads   -> fall through to the resource environment (getfenv(1))
+ *   - execution is pcall()-protected, so a runtime error in the user code
+ *     cannot leave the VM in a bad state.
+ *
+ * The MTA client VMs are Lua 5.1, so loadstring/setfenv/getfenv exist there.
+ * Lua 5.1 has only ONE long-string form (]]...]]); equals-level long
+ * brackets are a Lua 5.2 feature and are NOT valid in the MTA VMs (verified
+ * on a Lua 5.1 build: the level-1 opener fails to parse). The user code is
+ * therefore embedded as a long string when it contains no close sequence,
+ * and as an escaped short string otherwise.
+ *
+ * Returns false if the wrapped script exceeds the 64 KB bridge buffer cap.
+ */
+static bool BuildSandboxWrapper(const char *code, size_t len, std::string &out)
+{
+    std::string body;
+    body.reserve(len + 16);
+    if (!BufferContains(code, len, "]]", 2)) {
+        body += "[[";
+        body.append(code, len);
+        body += "]]";
+    } else {
+        body += "'";
+        for (size_t i = 0; i < len; ++i) {
+            unsigned char c = (unsigned char)code[i];
+            switch (c) {
+                case '\\': body += "\\\\"; break;
+                case '\'': body += "\\'";  break;
+                case '\n': body += "\\n";  break;
+                case '\r': body += "\\r";  break;
+                case '\t': body += "\\t";  break;
+                default:
+                    if (c < 0x20) {
+                        char tmp[8];
+                        snprintf(tmp, sizeof tmp, "\\%03o", (unsigned)c);
+                        body += tmp;
+                    } else {
+                        body += (char)c;
+                    }
+            }
+        }
+        body += "'";
+    }
+
+    out.clear();
+    out.reserve(body.size() + 512);
+    out += "local code = ";
+    out += body;
+    out += "\nlocal f, lerr = loadstring(code, \"@nrth_inject\")\n";
+    out += "if not f then print(\"NRTH: inject load error: \" .. tostring(lerr)) return false end\n";
+    out += "local env = setmetatable({}, { __index = getfenv(1) })\n";
+    out += "setfenv(f, env)\n";
+    out += "local ok, err = pcall(f)\n";
+    out += "if not ok then print(\"NRTH: inject error: \" .. tostring(err)) return false end\n";
+    out += "return true\n";
+    return out.size() <= 65535;
+}
+
 static bool RunLuaBuffer(const char *code, size_t len, const char *chunkName, int vmMode)
 {
-    /* First try the MTA Lua VM bridge (0x1013bf04 / default_L 0x1013c95c with "@custom") */
-    if (NrthUI_ExecuteLuaViaBridge(code, len, vmMode)) {
+    /* Sandbox the user code before it touches an MTA VM: global writes from
+     * injected code used to clobber the target resource's environment, which
+     * broke that resource's logic after injection. */
+    std::string sandbox;
+    bool wrapped = BuildSandboxWrapper(code, len, sandbox);
+    if (!wrapped && s_console.size() < 16384) {
+        s_console += "[error] inject: script too large to sandbox (64 KB bridge limit)\n";
+    }
+    if (wrapped && NrthUI_ExecuteLuaViaBridge(sandbox.c_str(), sandbox.size(), vmMode)) {
         return true;
     }
+    /* Fallback to the embedded Lua 5.4.6 VM (isolated, no resource involved) */
 
     /* Fallback to the embedded Lua 5.4.6 VM using "@custom" chunk name */
     static char s_customChunk[sizeof(kCt_CustomChunk)] = {0};
@@ -820,11 +904,6 @@ static bool s_scriptsScanned = false;
 static char s_packetSearch[64] = "";
 static int  s_packetSel = -1;
 
-struct PlayerRow { std::string name; bool isYou; };
-static std::vector<PlayerRow> s_players;
-static std::vector<std::string> s_friends;
-static char s_playerFilterBuf[64] = "";
-static int  s_playerSel = 0;
 static char s_markerName[64] = "";
 
 struct ConfigItem { std::string name; };
@@ -1363,22 +1442,88 @@ static void DrawPackets()
     ImGui::EndChild();
 }
 
+/* Sanitize a name for use as a folder/file name on NTFS (keeps the charset
+ * NTFS + path rules are happy with; everything else is dropped or '_'). */
+static std::string SanitizePathName(const std::string &in, const char *fallback)
+{
+    std::string out;
+    for (char ch : in) {
+        if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
+            (ch >= '0' && ch <= '9') || ch == '_' || ch == '-' || ch == '.') {
+            out.push_back(ch);
+        } else if (ch == '/' || ch == '\\' || ch == ':' || ch == ' ') {
+            out.push_back('_');
+        }
+    }
+    while (out.size() > 2 && out.back() == '.') out.pop_back();
+    if (out.empty()) out = fallback;
+    if (out.size() > 64) out.resize(64);
+    return out;
+}
+
+struct FindMainWndCtx { DWORD pid; HWND best; LONG bestArea; };
+static BOOL CALLBACK NrthUI_FindMainWndProc(HWND h, LPARAM lp)
+{
+    FindMainWndCtx *c = (FindMainWndCtx *)lp;
+    DWORD pid = 0;
+    GetWindowThreadProcessId(h, &pid);
+    if (pid != c->pid || !IsWindowVisible(h)) return TRUE;
+    RECT r;
+    if (!GetWindowRect(h, &r)) return TRUE;
+    LONG area = (LONG)((LONG)(r.right - r.left) * (LONG)(r.bottom - r.top));
+    if (area > c->bestArea) { c->bestArea = area; c->best = h; }
+    return TRUE;
+}
+
+/* Best-effort name of the server the client is attached to, for the dump
+ * folder: the MTA client window title carries the server name while
+ * connected (e.g. "MTA:SA - <server>"). Pure Win32, no memory offsets.
+ * Falls back to "unknown" when no usable title can be read. */
+static std::string NrthUI_GetServerNameForDump()
+{
+    static char s_title[512];
+    FindMainWndCtx ctx;
+    ctx.pid = GetCurrentProcessId();
+    ctx.best = NULL;
+    ctx.bestArea = 0;
+    EnumWindows(NrthUI_FindMainWndProc, (LPARAM)&ctx);
+    s_title[0] = 0;
+    if (ctx.best) GetWindowTextA(ctx.best, s_title, sizeof(s_title));
+    if (!s_title[0]) return "unknown";
+
+    std::string t(s_title);
+    size_t dash = t.find(" - ");
+    if (dash != std::string::npos) t = t.substr(dash + 3);
+    size_t b = t.find_first_not_of(" \t[");
+    if (b != std::string::npos) t.erase(0, b);
+    while (!t.empty() && (t.back() == ' ' || t.back() == '\t' || t.back() == ']')) t.pop_back();
+    if (t.empty()) return "unknown";
+    return SanitizePathName(t, "unknown");
+}
+
+/* Write one captured script to disk under the per-server tree:
+ *   C:\NVX\dump\<server name>\<resource name>\<script file>
+ */
 static bool SaveDumperEntryToDisk(const DumperFileEntry &entry)
 {
     CreateDirectoryA("C:\\NVX", NULL);
     CreateDirectoryA("C:\\NVX\\dump", NULL);
-    std::string safeName;
-    for (char ch : entry.name) {
-        if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
-            (ch >= '0' && ch <= '9') || ch == '_' || ch == '-' || ch == '.') {
-            safeName.push_back(ch);
-        } else if (ch == '/' || ch == '\\' || ch == ':') {
-            safeName.push_back('_');
-        }
-    }
-    if (safeName.empty()) safeName = "script.lua";
-    if (safeName.find(".lua") == std::string::npos) safeName += ".lua";
-    std::string fullPath = "C:\\NVX\\dump\\" + safeName;
+
+    const std::string server = NrthUI_GetServerNameForDump();
+    const std::string resource =
+        entry.resource.empty() ? std::string("unsorted") : SanitizePathName(entry.resource, "unsorted");
+
+    const std::string serverDir  = "C:\\NVX\\dump\\" + server;
+    const std::string resourceDir = serverDir + "\\" + resource;
+    CreateDirectoryA(serverDir.c_str(), NULL);
+    CreateDirectoryA(resourceDir.c_str(), NULL);
+
+    size_t slash = entry.name.find_last_of("/\\");
+    std::string base = (slash == std::string::npos) ? entry.name : entry.name.substr(slash + 1);
+    base = SanitizePathName(base, "script.lua");
+    if (base.find(".lua") == std::string::npos) base += ".lua";
+
+    std::string fullPath = resourceDir + "\\" + base;
     FILE *fp = fopen(fullPath.c_str(), "wb");
     if (!fp) return false;
     fwrite(entry.code.data(), 1, entry.code.size(), fp);
@@ -1455,411 +1600,12 @@ static void DrawDumper()
             ImGui::TextUnformatted(e.code.c_str());
         }
     } else {
-        ImGui::TextDisabled("%s", L("Select a captured script from the left panel to preview or dump to C:\\NVX\\dump\\",
+        ImGui::TextDisabled("%s", L("Select a captured script from the left panel to preview or dump to C:\\NVX\\dump<server><resource>\\",
                                     "اختر سكربت من القائمة اليسرى للمعاينة أو الحفظ في C:\\NVX\\dump\\"));
     }
     ImGui::EndChild();
 }
 
-/* ===========================================================================
- * Player list population.
- *
- * s_players is filled through the MTA Lua VM bridge (same channel as the
- * Money Exploit button): a small script enumerates players inside the game
- * and writes "Y<name>" / "N<name>" lines (Y = local player) to
- * nrth_players.txt — trying BOTH "C:\NVX\..." and the bare relative name,
- * via BOTH io.open and MTA fileCreate, INDEPENDENTLY (MTA client file APIs
- * are sandboxed and a "successful" handle may not write where we expect).
- * C reads the file whenever the Player tab is shown (re-firing the script
- * once per second) and DISCOVERS where the file landed by scanning C:\NVX,
- * the process CWD, the MTA install root and the resource tree.
- *
- * The local player is added EXPLICITLY (before the getElementsByType loop)
- * and duplicates are dropped by name, so the local player is guaranteed to
- * appear in the list on every MTA version/build — even on builds where the
- * client-side getElementsByType("player") does not include the local player.
- *
- * MULTI-VM: the C side fires this script into the default VM AND every
- * registered VM (resource VMs). PROVEN LIVE (user MTA 1.6): the default
- * VM lacks client element natives — getElementName is nil there, which
- * killed the script ("Custom:14: attempt to call global 'getElementName'").
- * So the script FIRST type-checks its required natives and returns
- * silently (no writes, no chat) in VMs that lack them; only a full client
- * resource VM actually runs the enumeration.
- *
- * Diagnostics (see the Debug section drawn at the bottom of the Player tab):
- *  - real player data is written to every working path with a "#W=<path>"
- *    marker; a failed enumeration is announced ONCE per VM in the chat
- *    ("NRTH: ERR ...") and never written to a file (so a broken VM can
- *    never clobber a good VM's file);
- *  - if every write fails, "WERR[<io status> | <fileCreate status>]" goes
- *    to the in-game chat (top-left) and the F8 console;
- *  - C side keeps: per-VM call stats, C:\NVX write probe, discovered file
- *    path/size/mtime, a raw content preview, and any ERR/WERR line.
- *
- * File line format (UTF-8, one player per line):
- *   Y<name>   — local player
- *   N<name>   — remote player
- *   #W=<path> — metadata: which path the script actually wrote
- *   ERR:...   — error report (never becomes a player row)
- * =========================================================================== */
-static const char kPlayerListLua[] =
-"pcall(function()\n"
-"if type(getElementName)~='function' or type(getElementsByType)~='function' or type(getLocalPlayer)~='function' then\n"
-" return\n"
-"end\n"
-"local ok,res=pcall(function()\n"
-" local lp=false\n"
-" local okl,lpv=pcall(getLocalPlayer)\n"
-" if okl and lpv then lp=lpv end\n"
-" local out={}\n"
-" local have={}\n"
-" local function add(n,isYou)\n"
-"  if n and n~='' and not have[n] then\n"
-"   have[n]=1\n"
-"   out[#out+1]=(isYou and 'Y' or 'N')..n\n"
-"  end\n"
-" end\n"
-" if lp then add(getElementName(lp),true) end\n"
-" for _,p in ipairs(getElementsByType('player')) do\n"
-"  add(getElementName(p),p==lp)\n"
-" end\n"
-" return table.concat(out,'\\n')\n"
-"end)\n"
-"if not ok then\n"
-" if _G.NRTH_PL_ERRDONE then return end\n"
-" _G.NRTH_PL_ERRDONE=true\n"
-" pcall(outputChatBox,'NRTH: ERR '..string.sub(tostring(res),1,60),0)\n"
-" return\n"
-"end\n"
-"if not res or res=='' then return end\n"
-"local base=res\n"
-"local ioe,fce='io-ok','fc-ok'\n"
-"local paths={'C:\\\\NVX\\\\nrth_players.txt','nrth_players.txt'}\n"
-"local wrote=false\n"
-"for i=1,#paths do\n"
-" local path=paths[i]\n"
-" local full=base..'\\n#W='..path\n"
-" local okf,f=pcall(function() return io.open(path,'w') end)\n"
-" if not okf then ioe=tostring(f)\n"
-" elseif f then if pcall(function() f:write(full) f:close() end) then wrote=true end end\n"
-" local ok2,h=pcall(function() return fileCreate(path) end)\n"
-" if not ok2 then fce=tostring(h)\n"
-" elseif h then if pcall(function() fileWrite(h,full,0) fileClose(h) end) then wrote=true end end\n"
-"end\n"
-"local report\n"
-"if wrote then report=base\n"
-"else report='WERR['..ioe..' | '..fce..']:'..base end\n"
-"if _G.NRTH_PL_LAST~=report then\n"
-" _G.NRTH_PL_LAST=report\n"
-" pcall(outputChatBox,'NRTH: '..string.sub(report,1,80),0)\n"
-" pcall(print,'NRTH: '..string.sub(report,1,80))\n"
-"end\n"
-"end)\n";
-struct PlayerListDiag
-{
-    bool   fileFound = false;
-    char   filePath[260] = {0};
-    long   fileBytes = 0;
-    char   fileMtime[32] = {0};
-    char   preview[200] = {0};
-    char   meta[160] = {0};
-    char   lastErr[200] = {0};
-    bool   bridgeLastTried = false;
-    bool   bridgeLastOk = false;
-    double bridgeLastTime = 0.0;
-    size_t scriptLen = 0;
-    bool   cProbeTried = false;
-    bool   cProbeOk = false;
-    int    vmCount = 0;
-    int    vmLastOk = -1;
-    char   mtaRoot[260] = {0};
-    char   cwd[260] = {0};
-};
-static PlayerListDiag s_plDiag;
-
-/* MTA client file APIs resolve paths against MTA's own base dir (resource /
- * install tree), NOT necessarily the process CWD — so the C side DISCOVERS
- * where the Lua script's file actually landed by scanning a candidate list:
- *   C:\NVX (C-side probe dir), process CWD, MTA install root (+NVX, +C\NVX
- *   variants for drive-stripped absolute paths), and the resource tree
- *   (mods\deathmatch\resources\<res>[\<sub>]) at depth 1..2.
- * The list is rebuilt every 5 s (resources may load later). */
-static char        s_plCandBuf[64][260];
-static const char *s_plCand[64];
-static int         s_plCandCount = 0;
-static double      s_plCandBuildAt = -1e9;
-
-static void PlayerListAddCand(const char *p)
-{
-    if (s_plCandCount >= 64 || !p || !p[0]) return;
-    for (int i = 0; i < s_plCandCount; ++i)
-        if (strcmp(s_plCandBuf[i], p) == 0) return;
-    strncpy(s_plCandBuf[s_plCandCount], p, 259);
-    s_plCandBuf[s_plCandCount][259] = 0;
-    s_plCand[s_plCandCount++] = s_plCandBuf[s_plCandCount];
-}
-
-static void PlayerListScanResDir(const char *dir, int depth)
-{
-    if (depth > 2) return;
-    char pat[300];
-    snprintf(pat, sizeof(pat), "%s\\*", dir);
-    WIN32_FIND_DATAA fd;
-    HANDLE h = FindFirstFileA(pat, &fd);
-    if (h == INVALID_HANDLE_VALUE) return;
-    do {
-        if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-            if (strcmp(fd.cFileName, ".") == 0 || strcmp(fd.cFileName, "..") == 0) continue;
-            char sub[300];
-            snprintf(sub, sizeof(sub), "%s\\%s", dir, fd.cFileName);
-            char f[560];
-            snprintf(f, sizeof(f), "%s\\nrth_players.txt", sub);
-            if (strlen(f) < 260) PlayerListAddCand(f);
-            PlayerListScanResDir(sub, depth + 1);
-        }
-    } while (FindNextFileA(h, &fd));
-    FindClose(h);
-}
-
-static void PlayerListBuildCandidates(double now)
-{
-    if (s_plCandCount > 0 && now - s_plCandBuildAt < 5.0) return;
-    s_plCandCount = 0;
-
-    PlayerListAddCand("C:\\NVX\\nrth_players.txt");
-    PlayerListAddCand("nrth_players.txt"); /* process CWD */
-
-    if (!s_plDiag.mtaRoot[0]) {
-        char exe[260] = {0};
-        GetModuleFileNameA(NULL, exe, 259);
-        char *sl = strrchr(exe, '\\');
-        if (sl) *sl = 0;
-        strncpy(s_plDiag.mtaRoot, exe, sizeof(s_plDiag.mtaRoot) - 1);
-        GetCurrentDirectoryA(259, s_plDiag.cwd);
-        s_plDiag.cwd[259] = 0;
-    }
-    char buf[300];
-    snprintf(buf, sizeof(buf), "%s\\nrth_players.txt", s_plDiag.mtaRoot);
-    PlayerListAddCand(buf);
-    snprintf(buf, sizeof(buf), "%s\\NVX\\nrth_players.txt", s_plDiag.mtaRoot);
-    PlayerListAddCand(buf);
-    snprintf(buf, sizeof(buf), "%s\\C\\NVX\\nrth_players.txt", s_plDiag.mtaRoot);
-    PlayerListAddCand(buf);
-    snprintf(buf, sizeof(buf), "%s\\mods\\deathmatch\\nrth_players.txt", s_plDiag.mtaRoot);
-    PlayerListAddCand(buf);
-    snprintf(buf, sizeof(buf), "%s\\mods\\deathmatch\\resources", s_plDiag.mtaRoot);
-    PlayerListScanResDir(buf, 1);
-
-    s_plCandBuildAt = now;
-}
-
-static void RefreshPlayerListFromFile()
-{
-    s_plDiag.fileFound = false;
-    s_plDiag.fileBytes = 0;
-    s_plDiag.fileMtime[0] = 0;
-
-    /* Pick the most recently modified existing candidate, then read it. */
-    int best = -1;
-    ULONGLONG bestT = 0;
-    for (int i = 0; i < s_plCandCount; ++i) {
-        HANDLE h = CreateFileA(s_plCand[i], GENERIC_READ,
-                               FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
-                               OPEN_EXISTING, 0, NULL);
-        if (h == INVALID_HANDLE_VALUE) continue;
-        FILETIME fta, ftc, ftw = {0, 0};
-        if (GetFileTime(h, &fta, &ftc, &ftw)) {
-            FILETIME local = ftw;
-            FileTimeToLocalFileTime(&local, &local);
-            SYSTEMTIME st;
-            if (FileTimeToSystemTime(&local, &st))
-                snprintf(s_plDiag.fileMtime, sizeof(s_plDiag.fileMtime),
-                         "%04d-%02d-%02d %02d:%02d:%02d",
-                         st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
-        }
-        ULONGLONG t = ((ULONGLONG)ftw.dwHighDateTime << 32) | (ULONGLONG)ftw.dwLowDateTime;
-        CloseHandle(h);
-        if (best < 0 || t > bestT) { best = i; bestT = t; }
-    }
-    if (best < 0) return;
-
-    FILE *fp = fopen(s_plCand[best], "rb");
-    if (!fp) return;
-    fseek(fp, 0, SEEK_END);
-    long sz = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-    std::string data;
-    if (sz > 0 && sz <= 65536) {
-        data.resize((size_t)sz);
-        if (fread(&data[0], 1, (size_t)sz, fp) == (size_t)sz) {
-            s_plDiag.fileFound = true;
-            s_plDiag.fileBytes = sz;
-            strncpy(s_plDiag.filePath, s_plCand[best], sizeof(s_plDiag.filePath) - 1);
-        }
-    }
-    fclose(fp);
-    if (sz <= 0) return;
-
-    /* Raw preview for the debug panel (newlines -> '|'). */
-    {
-        size_t n = 0;
-        for (size_t i = 0; i < data.size() && n < sizeof(s_plDiag.preview) - 2; ++i) {
-            if (data[i] == '\n') { s_plDiag.preview[n++] = '|'; continue; }
-            if (data[i] == '\r') continue;
-            s_plDiag.preview[n++] = data[i];
-        }
-        s_plDiag.preview[n] = 0;
-    }
-
-    std::vector<PlayerRow> next;
-    std::string firstErr, meta;
-    size_t pos = 0;
-    while (pos < data.size()) {
-        size_t nl = data.find('\n', pos);
-        size_t end = (nl == std::string::npos) ? data.size() : nl;
-        std::string line = data.substr(pos, end - pos);
-        if (!line.empty() && line.back() == '\r') line.pop_back();
-        if (!line.empty() && (line[0] == 'Y' || line[0] == 'N') && line.size() >= 2) {
-            PlayerRow r;
-            r.isYou = (line[0] == 'Y');
-            r.name = line.substr(1);
-            if (!r.name.empty()) next.push_back(r);
-        } else if (!line.empty() && line[0] == '#') {
-            meta = line;
-        } else if (!line.empty() && (line.rfind("ERR:", 0) == 0 || line.rfind("WERR[", 0) == 0)) {
-            if (firstErr.empty()) firstErr = line;
-        }
-        pos = (nl == std::string::npos) ? data.size() : nl + 1;
-    }
-    if (firstErr.size() > sizeof(s_plDiag.lastErr) - 1) firstErr.resize(sizeof(s_plDiag.lastErr) - 1);
-    memcpy(s_plDiag.lastErr, firstErr.c_str(), firstErr.size());
-    s_plDiag.lastErr[firstErr.size()] = 0;
-    if (meta.size() > sizeof(s_plDiag.meta) - 1) meta.resize(sizeof(s_plDiag.meta) - 1);
-    memcpy(s_plDiag.meta, meta.c_str(), meta.size());
-    s_plDiag.meta[meta.size()] = 0;
-
-    if (next.empty()) return; /* error report / partial write — keep previous list */
-    int keep = -1;
-    if (s_playerSel >= 0 && s_playerSel < (int)s_players.size())
-        for (int i = 0; i < (int)next.size(); ++i)
-            if (next[i].name == s_players[s_playerSel].name) { keep = i; break; }
-    s_players.swap(next);
-    s_playerSel = (keep >= 0) ? keep : 0;
-}
-
-static void PlayerListTick()
-{
-    /* Ensure the file-channel directory exists (MTA io.open will not create it).
-     * Idempotent — matches the C:\NVX convention used by SaveDumperEntryToDisk. */
-    CreateDirectoryA("C:\\NVX", NULL);
-
-    /* C-side write probe: proves C:\NVX is writable from the game process. */
-    if (!s_plDiag.cProbeTried) {
-        s_plDiag.cProbeTried = true;
-        FILE *fp = fopen("C:\\NVX\\nrth_c_probe.txt", "w");
-        if (fp) { fputs("ok", fp); fclose(fp); s_plDiag.cProbeOk = true; }
-    }
-
-    double now = ImGui::GetTime();
-    static double s_lastWrite = -1e9; /* force an immediate first write */
-    if (now - s_lastWrite >= 1.0) {
-        s_lastWrite = now;
-        s_plDiag.scriptLen = sizeof(kPlayerListLua) - 1;
-        s_plDiag.bridgeLastTried = true;
-        s_plDiag.bridgeLastTime = now;
-        /* Fire into the default VM AND every registered VM (resource VMs).
-         * PROVEN LIVE: the default VM lacks client element natives
-         * (getElementName is nil there — "Custom:14" error), while full
-         * client resource VMs have them. The script self-selects: it
-         * type-checks its natives first and stays completely silent in
-         * VMs that lack them (no file writes, no chat). */
-        const NrthLuaVmBridge *br = Nrth_GetLuaVmBridge();
-        int maxVm = br ? (int)br->slotCount : 0;
-        int vmOk = 0;
-        s_plDiag.vmLastOk = -1;
-        for (int vm = 0; vm <= maxVm; ++vm) {
-            if (NrthUI_ExecuteLuaViaBridge(kPlayerListLua, s_plDiag.scriptLen, vm)) {
-                ++vmOk;
-                s_plDiag.vmLastOk = vm;
-            }
-        }
-        s_plDiag.vmCount = maxVm + 1;
-        s_plDiag.bridgeLastOk = (vmOk > 0);
-    }
-    PlayerListBuildCandidates(now);
-    RefreshPlayerListFromFile();
-}
-
-static void DrawPlayerTab()
-{
-    PlayerListTick();
-    if (s_playerSel >= (int)s_players.size()) s_playerSel = 0;
-    ImGui::InputTextWithHint("##player_filter", L("filter...", "فلتر..."),
-                             s_playerFilterBuf, sizeof(s_playerFilterBuf));
-    ImGui::SetNextItemWidth(280);
-    std::string preview = s_players.empty() ? L("Select player...", "اختر لاعب...") :
-        (s_players[s_playerSel].name + (s_players[s_playerSel].isYou ? std::string(" (") + L("you", "أنت") + ")" : ""));
-    if (ImGui::BeginCombo("##player_combo", preview.c_str())) {
-        for (int i = 0; i < (int)s_players.size(); ++i) {
-            if (s_playerFilterBuf[0] && s_players[i].name.find(s_playerFilterBuf) == std::string::npos) continue;
-            std::string lbl = s_players[i].name + (s_players[i].isYou ? std::string(" (") + L("you", "أنت") + ")" : "");
-            if (ImGui::Selectable(lbl.c_str(), s_playerSel == i)) s_playerSel = i;
-        }
-        if (s_players.empty())
-            ImGui::TextDisabled("%s", L("No players found (list refreshes automatically)", "لا لاعبين (القائمة تتحدث تلقائياً)"));
-        ImGui::EndCombo();
-    }
-    if (ImGui::Button(L("Teleport", "تنقل"))) FeatureAction(L("Teleport", "تنقل"));
-    ImGui::SameLine();
-    if (ImGui::Button(L("Bomb", "تفجير"))) FeatureAction(L("Bomb", "تفجير"));
-    ImGui::SameLine();
-    if (ImGui::Button(L("Add Friend", "إضافة صديق"))) {
-        if (!s_players.empty()) s_friends.push_back(s_players[s_playerSel].name);
-    }
-    ImGui::SameLine();
-    if (ImGui::Button(L("Delete Friend", "حذف صديق")) && !s_friends.empty())
-        s_friends.pop_back();
-    ImGui::Separator();
-    ImGui::Text("%s", L("Friend's list", "قائمة الأصدقاء"));
-    if (s_friends.empty()) ImGui::TextDisabled("%s", L("No friends added", "لا أصدقاء"));
-    for (auto &f : s_friends) ImGui::BulletText("%s", f.c_str());
-
-    /* ---- Player-list diagnostics (temporary debug section) ---- */
-    ImGui::Separator();
-    ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.35f, 1.0f), "%s",
-                       L("Debug — screenshot this if the list stays empty",
-                         "تصحيح — صوّر هذا الجزء إن بقيت القائمة فارغة"));
-    const NrthLuaVmBridge *br = Nrth_GetLuaVmBridge();
-    ImGui::TextDisabled("bridge : %s  L=%p  load=%p  pcall=%p  slots=%u",
-                        br ? "ready" : "NULL",
-                        br ? br->default_L_1013c95c : nullptr,
-                        br ? (void *)br->loadbuffer_1013c94c : nullptr,
-                        br ? (void *)br->pcall_1013c974 : nullptr,
-                        br ? br->slotCount : 0u);
-    ImGui::TextDisabled("call   : %s  (%.1fs ago, %zu B script)",
-                        s_plDiag.bridgeLastTried ? (s_plDiag.bridgeLastOk ? "OK (rc=0)" : "FAIL (rc!=0)") : "never",
-                        s_plDiag.bridgeLastTried ? (ImGui::GetTime() - s_plDiag.bridgeLastTime) : -1.0,
-                        s_plDiag.scriptLen);
-    ImGui::TextDisabled("vms    : %d fired (default + %d slots), last pcall-ok vm=#%d",
-                        s_plDiag.vmCount,
-                        s_plDiag.vmCount ? s_plDiag.vmCount - 1 : 0,
-                        s_plDiag.vmLastOk);
-    ImGui::TextDisabled("cprobe : C:\\NVX write %s",
-                        s_plDiag.cProbeTried ? (s_plDiag.cProbeOk ? "OK" : "FAIL") : "not yet");
-    ImGui::TextDisabled("mta    : %s", s_plDiag.mtaRoot[0] ? s_plDiag.mtaRoot : "?");
-    ImGui::TextDisabled("cwd    : %s", s_plDiag.cwd[0] ? s_plDiag.cwd : "?");
-    if (s_plDiag.fileFound)
-        ImGui::TextDisabled("file   : %s  (%ld B, mtime %s)",
-                            s_plDiag.filePath, s_plDiag.fileBytes, s_plDiag.fileMtime);
-    else
-        ImGui::TextDisabled("file   : NOT FOUND  (scanned %d candidates incl. resources tree)",
-                            s_plCandCount);
-    if (s_plDiag.meta[0])  ImGui::TextDisabled("meta   : %s", s_plDiag.meta);
-    if (s_plDiag.preview[0]) ImGui::TextDisabled("data   : %s", s_plDiag.preview);
-    if (s_plDiag.lastErr[0])
-        ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.2f, 1.0f), "error  : %s", s_plDiag.lastErr);
-}
 
 static void TriggerFeatureImmediateAction(Feature &f)
 {
@@ -2534,20 +2280,19 @@ void NrthUI_Build()
         DrawDumper();
         ImGui::EndChild();
     } else if (s_topTab == 2) {
-        static const char *kCSubEn[] = {"Player", "Other", "Markers"};
-        static const char *kCSubAr[] = {"اللاعب", "أخرى", "العلامات"};
-        float sw = (ImGui::GetContentRegionAvail().x - 2 * 6.f) / 3.f;
-        for (int i = 0; i < 3; ++i) {
+        static const char *kCSubEn[] = {"Other", "Markers"};
+        static const char *kCSubAr[] = {"أخرى", "العلامات"};
+        float sw = (ImGui::GetContentRegionAvail().x - 6.f) / 2.f;
+        for (int i = 0; i < 2; ++i) {
             char hid[32];
             snprintf(hid, sizeof(hid), "nvx_csub_%d", i);
             if (TabButton(L(kCSubEn[i], kCSubAr[i]), hid, s_cheatSub == i, ImVec2(sw, 28))) s_cheatSub = i;
-            if (i < 2) ImGui::SameLine();
+            if (i < 1) ImGui::SameLine();
         }
         ImGui::BeginChild("##nvx_content", ImVec2(0, 0), true);
         switch (s_cheatSub) {
-            case 0: DrawPlayerTab();  break;
-            case 1: DrawOtherTab();   break;
-            case 2: DrawMarkersTab(); break;
+            case 0: DrawOtherTab();   break;
+            case 1: DrawMarkersTab(); break;
         }
         ImGui::EndChild();
     } else if (s_topTab == 3) {
