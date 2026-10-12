@@ -1465,11 +1465,16 @@ static void DrawDumper()
  * Player list population.
  *
  * s_players is filled through the MTA Lua VM bridge (same channel as the
- * Money Exploit button): a small script enumerates getElementsByType("player")
- * inside the game and writes "Y<name>" / "N<name>" lines (Y = local player)
- * to C:\NVX\nrth_players.txt (project file-channel convention, cf.
+ * Money Exploit button): a small script enumerates players inside the game
+ * and writes "Y<name>" / "N<name>" lines (Y = local player) to
+ * C:\NVX\nrth_players.txt (project file-channel convention, cf.
  * SaveDumperEntryToDisk). C reads the file whenever the Player tab is shown
  * and refreshes the script once per second.
+ *
+ * The local player is added EXPLICITLY (before the getElementsByType loop)
+ * and duplicates are dropped by name, so the local player is guaranteed to
+ * appear in the list on every MTA version/build — even on builds where the
+ * client-side getElementsByType("player") does not include the local player.
  *
  * Line format (UTF-8, one player per line):
  *   Y<name>   — local player
@@ -1477,13 +1482,20 @@ static void DrawDumper()
  * =========================================================================== */
 static const char kPlayerListLua[] =
 "pcall(function()\n"
-"local lp=''\n"
-"local okl,lpe=pcall(getLocalPlayer)\n"
-"if okl and lpe then lp=getElementName(lpe) end\n"
+"local lp=false\n"
+"local okl,lpv=pcall(getLocalPlayer)\n"
+"if okl and lpv then lp=lpv end\n"
 "local out={}\n"
+"local have={}\n"
+"local function add(n,isYou)\n"
+" if n and n~='' and not have[n] then\n"
+"  have[n]=1\n"
+"  out[#out+1]=(isYou and 'Y' or 'N')..n\n"
+" end\n"
+"end\n"
+"if lp then add(getElementName(lp),true) end\n"
 "for _,p in ipairs(getElementsByType('player')) do\n"
-" local n=getElementName(p)\n"
-" if n then out[#out+1]=((n==lp) and 'Y' or 'N')..n end\n"
+" add(getElementName(p),p==lp)\n"
 "end\n"
 "local data=table.concat(out,'\\n')\n"
 "local okf,f=pcall(io.open,'C:\\\\NVX\\\\nrth_players.txt','w')\n"
