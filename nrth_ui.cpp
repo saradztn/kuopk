@@ -1468,72 +1468,185 @@ static void DrawDumper()
  * Money Exploit button): a small script enumerates players inside the game
  * and writes "Y<name>" / "N<name>" lines (Y = local player) to
  * C:\NVX\nrth_players.txt (project file-channel convention, cf.
- * SaveDumperEntryToDisk). C reads the file whenever the Player tab is shown
- * and refreshes the script once per second.
+ * SaveDumperEntryToDisk), falling back to the game dir if that fails.
+ * C reads the file whenever the Player tab is shown and re-fires the script
+ * once per second.
  *
  * The local player is added EXPLICITLY (before the getElementsByType loop)
  * and duplicates are dropped by name, so the local player is guaranteed to
  * appear in the list on every MTA version/build — even on builds where the
  * client-side getElementsByType("player") does not include the local player.
  *
- * Line format (UTF-8, one player per line):
+ * Diagnostics (see the Debug section drawn at the bottom of the Player tab):
+ *  - the script ALWAYS writes its result: player lines + "#W=<path>" on
+ *    success, "ERR:<message>" if the enumeration itself failed, or a
+ *    "WERR[<io status> | <fileCreate status>]" prefix if every write attempt
+ *    failed (in that case the report goes to the in-game chat only);
+ *  - changes are announced via outputChatBox/print in the MTA VM, so the
+ *    script's verdict is visible in the game chat (top-left) too;
+ *  - C side keeps: last bridge call result, C:\NVX write probe, file
+ *    size/mtime, a raw content preview, and any ERR/WERR line.
+ *
+ * File line format (UTF-8, one player per line):
  *   Y<name>   — local player
  *   N<name>   — remote player
+ *   #W=<path> — metadata: which path the script actually wrote
+ *   ERR:...   — error report (never becomes a player row)
  * =========================================================================== */
 static const char kPlayerListLua[] =
 "pcall(function()\n"
-"local lp=false\n"
-"local okl,lpv=pcall(getLocalPlayer)\n"
-"if okl and lpv then lp=lpv end\n"
-"local out={}\n"
-"local have={}\n"
-"local function add(n,isYou)\n"
-" if n and n~='' and not have[n] then\n"
-"  have[n]=1\n"
-"  out[#out+1]=(isYou and 'Y' or 'N')..n\n"
+"local ok,res=pcall(function()\n"
+" local lp=false\n"
+" local okl,lpv=pcall(getLocalPlayer)\n"
+" if okl and lpv then lp=lpv end\n"
+" local out={}\n"
+" local have={}\n"
+" local function add(n,isYou)\n"
+"  if n and n~='' and not have[n] then\n"
+"   have[n]=1\n"
+"   out[#out+1]=(isYou and 'Y' or 'N')..n\n"
+"  end\n"
+" end\n"
+" if lp then add(getElementName(lp),true) end\n"
+" for _,p in ipairs(getElementsByType('player')) do\n"
+"  add(getElementName(p),p==lp)\n"
+" end\n"
+" return table.concat(out,'\\n')\n"
+"end)\n"
+"local base=ok and res or ('ERR:'..tostring(res))\n"
+"local ioe,fce='io-ok','fc-ok'\n"
+"local paths={'C:\\\\NVX\\\\nrth_players.txt','nrth_players.txt'}\n"
+"local wrote,wpath=false,nil\n"
+"for i=1,#paths do\n"
+" if not wrote then\n"
+"  local path=paths[i]\n"
+"  local full=base..'\\n#W='..path\n"
+"  local okf,f=pcall(function() return io.open(path,'w') end)\n"
+"  if not okf then ioe=tostring(f)\n"
+"  elseif f then f:write(full) f:close() wrote=true wpath=path end\n"
+"  if not wrote then\n"
+"   local ok2,h=pcall(fileCreate,path)\n"
+"   if not ok2 then fce=tostring(h)\n"
+"   elseif h then pcall(fileWrite,h,full,0) pcall(fileClose,h) wrote=true wpath=path end\n"
+"  end\n"
 " end\n"
 "end\n"
-"if lp then add(getElementName(lp),true) end\n"
-"for _,p in ipairs(getElementsByType('player')) do\n"
-" add(getElementName(p),p==lp)\n"
+"local report\n"
+"if wrote then report=base\n"
+"else report='WERR['..ioe..' | '..fce..']:'..base end\n"
+"if _G.NRTH_PL_LAST~=report then\n"
+" _G.NRTH_PL_LAST=report\n"
+" pcall(outputChatBox,'NRTH: '..string.sub(report,1,80),0)\n"
+" pcall(print,'NRTH: '..string.sub(report,1,80))\n"
 "end\n"
-"local data=table.concat(out,'\\n')\n"
-"local okf,f=pcall(io.open,'C:\\\\NVX\\\\nrth_players.txt','w')\n"
-"if okf and f then f:write(data) f:close() return end\n"
-"pcall(function()\n"
-" local h=fileCreate('C:\\\\NVX\\\\nrth_players.txt')\n"
-" if h then fileWrite(h,data,0) fileClose(h) end\n"
-"end)\n"
 "end)\n";
+
+struct PlayerListDiag
+{
+    bool   fileFound = false;
+    char   filePath[260] = {0};
+    long   fileBytes = 0;
+    char   fileMtime[32] = {0};
+    char   preview[200] = {0};
+    char   meta[160] = {0};
+    char   lastErr[200] = {0};
+    bool   bridgeLastTried = false;
+    bool   bridgeLastOk = false;
+    double bridgeLastTime = 0.0;
+    size_t scriptLen = 0;
+    bool   cProbeTried = false;
+    bool   cProbeOk = false;
+};
+static PlayerListDiag s_plDiag;
+
+static const char *kPlayerListPaths[] = { "C:\\NVX\\nrth_players.txt", "nrth_players.txt" };
 
 static void RefreshPlayerListFromFile()
 {
-    const char *path = "C:\\NVX\\nrth_players.txt";
-    FILE *fp = fopen(path, "rb");
+    s_plDiag.fileFound = false;
+    s_plDiag.fileBytes = 0;
+    s_plDiag.fileMtime[0] = 0;
+
+    /* Pick the most recently modified existing candidate, then read it. */
+    int best = -1;
+    ULONGLONG bestT = 0;
+    for (int i = 0; i < 2; ++i) {
+        HANDLE h = CreateFileA(kPlayerListPaths[i], GENERIC_READ,
+                               FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+                               OPEN_EXISTING, 0, NULL);
+        if (h == INVALID_HANDLE_VALUE) continue;
+        FILETIME fta, ftc, ftw = {0, 0};
+        if (GetFileTime(h, &fta, &ftc, &ftw)) {
+            FILETIME local = ftw;
+            FileTimeToLocalFileTime(&local, &local);
+            SYSTEMTIME st;
+            if (FileTimeToSystemTime(&local, &st))
+                snprintf(s_plDiag.fileMtime, sizeof(s_plDiag.fileMtime),
+                         "%04d-%02d-%02d %02d:%02d:%02d",
+                         st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+        }
+        ULONGLONG t = ((ULONGLONG)ftw.dwHighDateTime << 32) | (ULONGLONG)ftw.dwLowDateTime;
+        CloseHandle(h);
+        if (best < 0 || t > bestT) { best = i; bestT = t; }
+    }
+    if (best < 0) return;
+
+    FILE *fp = fopen(kPlayerListPaths[best], "rb");
     if (!fp) return;
     fseek(fp, 0, SEEK_END);
     long sz = ftell(fp);
     fseek(fp, 0, SEEK_SET);
-    if (sz <= 0 || sz > 65536) { fclose(fp); return; }
     std::string data;
-    data.resize((size_t)sz);
-    if (fread(&data[0], 1, (size_t)sz, fp) != (size_t)sz) { fclose(fp); return; }
+    if (sz > 0 && sz <= 65536) {
+        data.resize((size_t)sz);
+        if (fread(&data[0], 1, (size_t)sz, fp) == (size_t)sz) {
+            s_plDiag.fileFound = true;
+            s_plDiag.fileBytes = sz;
+            strncpy(s_plDiag.filePath, kPlayerListPaths[best], sizeof(s_plDiag.filePath) - 1);
+        }
+    }
     fclose(fp);
+    if (sz <= 0) return;
+
+    /* Raw preview for the debug panel (newlines -> '|'). */
+    {
+        size_t n = 0;
+        for (size_t i = 0; i < data.size() && n < sizeof(s_plDiag.preview) - 2; ++i) {
+            if (data[i] == '\n') { s_plDiag.preview[n++] = '|'; continue; }
+            if (data[i] == '\r') continue;
+            s_plDiag.preview[n++] = data[i];
+        }
+        s_plDiag.preview[n] = 0;
+    }
 
     std::vector<PlayerRow> next;
+    std::string firstErr, meta;
     size_t pos = 0;
     while (pos < data.size()) {
         size_t nl = data.find('\n', pos);
         size_t end = (nl == std::string::npos) ? data.size() : nl;
-        if (end - pos >= 2) {
+        std::string line = data.substr(pos, end - pos);
+        if (!line.empty() && line.back() == '\r') line.pop_back();
+        if (!line.empty() && (line[0] == 'Y' || line[0] == 'N') && line.size() >= 2) {
             PlayerRow r;
-            r.isYou = (data[pos] == 'Y');
-            r.name = data.substr(pos + 1, end - pos - 1);
+            r.isYou = (line[0] == 'Y');
+            r.name = line.substr(1);
             if (!r.name.empty()) next.push_back(r);
+        } else if (!line.empty() && line[0] == '#') {
+            meta = line;
+        } else if (!line.empty() && (line.rfind("ERR:", 0) == 0 || line.rfind("WERR[", 0) == 0)) {
+            if (firstErr.empty()) firstErr = line;
         }
         pos = (nl == std::string::npos) ? data.size() : nl + 1;
     }
-    if (next.empty()) return; /* partial/empty write — keep previous list */
+    if (firstErr.size() > sizeof(s_plDiag.lastErr) - 1) firstErr.resize(sizeof(s_plDiag.lastErr) - 1);
+    memcpy(s_plDiag.lastErr, firstErr.c_str(), firstErr.size());
+    s_plDiag.lastErr[firstErr.size()] = 0;
+    if (meta.size() > sizeof(s_plDiag.meta) - 1) meta.resize(sizeof(s_plDiag.meta) - 1);
+    memcpy(s_plDiag.meta, meta.c_str(), meta.size());
+    s_plDiag.meta[meta.size()] = 0;
+
+    if (next.empty()) return; /* error report / partial write — keep previous list */
     int keep = -1;
     if (s_playerSel >= 0 && s_playerSel < (int)s_players.size())
         for (int i = 0; i < (int)next.size(); ++i)
@@ -1548,11 +1661,22 @@ static void PlayerListTick()
      * Idempotent — matches the C:\NVX convention used by SaveDumperEntryToDisk. */
     CreateDirectoryA("C:\\NVX", NULL);
 
+    /* C-side write probe: proves C:\NVX is writable from the game process. */
+    if (!s_plDiag.cProbeTried) {
+        s_plDiag.cProbeTried = true;
+        FILE *fp = fopen("C:\\NVX\\nrth_c_probe.txt", "w");
+        if (fp) { fputs("ok", fp); fclose(fp); s_plDiag.cProbeOk = true; }
+    }
+
     double now = ImGui::GetTime();
     static double s_lastWrite = -1e9; /* force an immediate first write */
     if (now - s_lastWrite >= 1.0) {
         s_lastWrite = now;
-        NrthUI_ExecuteLuaViaBridge(kPlayerListLua, sizeof(kPlayerListLua) - 1, 0);
+        s_plDiag.scriptLen = sizeof(kPlayerListLua) - 1;
+        s_plDiag.bridgeLastOk =
+            NrthUI_ExecuteLuaViaBridge(kPlayerListLua, s_plDiag.scriptLen, 0);
+        s_plDiag.bridgeLastTried = true;
+        s_plDiag.bridgeLastTime = now;
     }
     RefreshPlayerListFromFile();
 }
@@ -1590,6 +1714,34 @@ static void DrawPlayerTab()
     ImGui::Text("%s", L("Friend's list", "قائمة الأصدقاء"));
     if (s_friends.empty()) ImGui::TextDisabled("%s", L("No friends added", "لا أصدقاء"));
     for (auto &f : s_friends) ImGui::BulletText("%s", f.c_str());
+
+    /* ---- Player-list diagnostics (temporary debug section) ---- */
+    ImGui::Separator();
+    ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.35f, 1.0f), "%s",
+                       L("Debug — screenshot this if the list stays empty",
+                         "تصحيح — صوّر هذا الجزء إن بقيت القائمة فارغة"));
+    const NrthLuaVmBridge *br = Nrth_GetLuaVmBridge();
+    ImGui::TextDisabled("bridge : %s  L=%p  load=%p  pcall=%p  slots=%u",
+                        br ? "ready" : "NULL",
+                        br ? br->default_L_1013c95c : nullptr,
+                        br ? (void *)br->loadbuffer_1013c94c : nullptr,
+                        br ? (void *)br->pcall_1013c974 : nullptr,
+                        br ? br->slotCount : 0u);
+    ImGui::TextDisabled("call   : %s  (%.1fs ago, %zu B script)",
+                        s_plDiag.bridgeLastTried ? (s_plDiag.bridgeLastOk ? "OK (rc=0)" : "FAIL (rc!=0)") : "never",
+                        s_plDiag.bridgeLastTried ? (ImGui::GetTime() - s_plDiag.bridgeLastTime) : -1.0,
+                        s_plDiag.scriptLen);
+    ImGui::TextDisabled("cprobe : C:\\NVX write %s",
+                        s_plDiag.cProbeTried ? (s_plDiag.cProbeOk ? "OK" : "FAIL") : "not yet");
+    if (s_plDiag.fileFound)
+        ImGui::TextDisabled("file   : %s  (%ld B, mtime %s)",
+                            s_plDiag.filePath, s_plDiag.fileBytes, s_plDiag.fileMtime);
+    else
+        ImGui::TextDisabled("file   : NOT FOUND  (C:\\NVX\\nrth_players.txt + game dir)");
+    if (s_plDiag.meta[0])  ImGui::TextDisabled("meta   : %s", s_plDiag.meta);
+    if (s_plDiag.preview[0]) ImGui::TextDisabled("data   : %s", s_plDiag.preview);
+    if (s_plDiag.lastErr[0])
+        ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.2f, 1.0f), "error  : %s", s_plDiag.lastErr);
 }
 
 static void TriggerFeatureImmediateAction(Feature &f)
