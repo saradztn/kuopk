@@ -1,0 +1,18 @@
+; csx_spoof.dll export definitions (zig cc -target x86-windows-gnu / MinGW compatible)
+;
+; Standalone replica DLL of the CSX.exe "spoofer" (Reset MTA Serial) feature.
+; Sample: CSX.exe SHA-256 d5ed9e6a57952d2a2d7876813376784868126e9295ee55ba01b45a395fc4ee556
+; Result category R2: behavioral reconstruction — see csx_spoof.h evidence block.
+;
+; Names are undecorated (extern "C") so GetProcAddress("CSX_SpooferResetMtaSerial")
+; works from C, Pascal, Python ctypes and PowerShell alike.
+LIBRARY csx_spoof
+EXPORTS
+    CSX_SpooferResetMtaSerial       @1
+    CSX_SpooferClearSsoCredential   @2
+    CSX_SpooferClearExplorerKeyTrees @3
+    CSX_SpooferClearNtDataStreams   @4
+    CSX_SpooferClearMtaSharedCache  @5
+    CSX_SpooferResetMtaRegValues    @6
+    CSX_SpooferProbe                @7
+    CSX_SpooferLastStatus           @8

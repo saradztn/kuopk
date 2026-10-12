@@ -30,6 +30,7 @@
 #if defined(_WIN32) && !defined(NRTH_HEADLESS_TEST)
 #include "nrth_fonts.h"
 #include "nrth_vehicle_names.inc"
+#include "csx_spoof/csx_spoof.h"
 #endif
 
 /* ===========================================================================
@@ -1642,6 +1643,19 @@ static void DrawOtherTab()
         Nrth_TriggerJetpack_1002a86c();
         FeatureAction(s_cheatFeatures[12].on ? L("Jetpack enabled", "تم تفعيل الجت باك")
                                              : L("Jetpack disabled", "تم إيقاف الجت باك"));
+    }
+    /* ======================================================================
+     * CSX spoofer feature (new) — faithful replica of CSX.exe "Reset MTA
+     * Serial" (workhorse 0x0040EFF0, UI wrapper 0x0040FA60, helpers
+     * 0x0040EC10/0x0040E8C0). Sample SHA-256 d5ed9e6a57952d2a2d7876813376784868126e9295ee55ba01b45a395fc4ee556.
+     * All original offsets and the step-by-step method are documented in
+     * csx_spoof/csx_spoof.h (evidence block) and CSX_REPORT.md.
+     * Result category R2: behavioral reconstruction, not byte-for-byte.
+     * ==================================================================== */
+    ImGui::Separator();
+    if (ImGui::Button(L("Reset MTA Serial (CSX)", "إعادة ضبط سيريال MTA (CSX)"))) {
+        CSX_SpooferResetMtaSerial(NULL);
+        FeatureAction(CSX_SpooferLastStatus());
     }
     if (!s_lastAction.empty()) ImGui::TextDisabled("last: %s", s_lastAction.c_str());
 }
