@@ -1,0 +1,36 @@
+; NRTH_audit.dll export definition (MinGW / MSVC compatible)
+;
+; Blue-team audit module for the NORTH/NVX MTA:SA case. Unlike NRTH.dll this module has no
+; injected-entry-point contract: every export is an ordinary C function that a scanner, an
+; EDR sensor or a triage script calls in its own process. Names are undecorated (extern "C",
+; default cdecl) so GetProcAddress("NrthAuditImageFile") works from C, Pascal, Python
+; (ctypes) and PowerShell alike. Ordinals are pinned so an internal rule set can keep working
+; if a name is ever renamed; new exports are appended, never renumbered.
+;
+; Nothing here touches another process: the whole API operates on a byte buffer the caller
+; already owns (a file copy or a dump it is allowed to read).
+LIBRARY NRTH_audit
+EXPORTS
+    NrthAuditVersion              @1
+    NrthSigCount                  @2
+    NrthSigAt                     @3
+    NrthPrologueStateName         @4
+    NrthPrologueIsTamper          @5
+    NrthXorTransform              @6
+    NrthXorCrack                  @7
+    NrthXorDecodeRecordAt         @8
+    NrthPatCompile                @9
+    NrthPatScan                  @10
+    NrthPatWidenHead             @11
+    NrthPatPatchHead             @12
+    NrthClassifyPrologue         @13
+    NrthPeMap                    @14
+    NrthPeSectionData            @15
+    NrthPeRvaToPtr               @16
+    NrthPeTextRva                @17
+    NrthAuditImage               @18
+    NrthAuditImageFile           @19
+    NrthFindHiddenSignatures     @20
+    NrthAuditSelfTest            @21
+    NrthAuditDiff                @22
+    NrthAuditDiffFiles           @23

@@ -1,0 +1,9 @@
+; NRTH.dll export definition (MinGW / MSVC compatible)
+; Evidence: export ordinal 1, name "NVXHookProc" (RVA 0x0000B9E0 in the sample),
+; PE Export Directory internal module name "nvx.dll" (linked as nvx.dll, deployed as NRTH.dll).
+; Loader resolves the export via GetProcAddress(hMod, "NVXHookProc").
+; The alias maps the undecorated export name to the i386 stdcall symbol
+; (_NVXHookProc@12) produced by the compiler.
+LIBRARY nvx.dll
+EXPORTS
+    NVXHookProc=NVXHookProc@12 @1
