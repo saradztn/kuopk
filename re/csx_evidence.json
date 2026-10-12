@@ -105,8 +105,8 @@
   ],
   "rebuild": {
     "dll": "bin/csx_spoof.dll",
-    "dll_sha256": "e08a228c225a6050c877dca4c69cbfb45d55ae3705b73b84603f268dcd8366be",
-    "test_exe_sha256": "314d02153accef9bd6fbd422f7d56858045161abef382d27150be4561dc1e32f",
+    "dll_sha256": "692b4cb621aaf7cc0a4062aed6ff2ae64c275c88845b924f5ad388bac5ecc4e2",
+    "test_exe_sha256": "e1b042b3c6748bf5415b49556b9393e7b0c40826377519619b2f01d4477210e0",
     "exports": [
       ["1", "CSX_SpooferResetMtaSerial", "0x22b0"],
       ["2", "CSX_SpooferClearSsoCredential", "0x1020"],
@@ -117,7 +117,7 @@
       ["7", "CSX_SpooferProbe", "0x2600"],
       ["8", "CSX_SpooferLastStatus", "0x2d20"]
     ],
-    "nrth_rebuild_sha256": "751d0f0fc6f61f1287c753cde1fa9b487aa1773d937403de7d33059663e390cd",
+    "nrth_rebuild_sha256": "95c9d9609f2c297dddba502cec9d00b51ee25b12646d2166a3c77ac74be23053",
     "nrth_nvxhookproc_rva": "0xb9e0 (contract preserved)",
     "notes": [
       "credapi resolved dynamically (zig lacks credapi import lib); calls identical",

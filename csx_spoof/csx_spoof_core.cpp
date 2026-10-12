@@ -322,27 +322,43 @@ CSX_SPOOF_API BOOL CSX_SpooferClearMtaSharedCache()
 }
 
 /* --- step 6 inner: the four value writes of one version key ------------- */
-static bool CsxResetMtaKey(const char *key, std::string &detail)
+static bool CsxResetMtaKey(const char *key, const char *tag, std::string &detail)
 {
     std::string general = std::string(key) + kSubGeneral;        /* body @0x0040F554 */
     std::string diag    = std::string(key) + kSubDiagnostics;    /* body @0x0040F73F */
 
+    /* Diagnostic note only: the original silently skips a key it cannot open
+     * (test eax,eax; jne -> no writes). We mirror that behavior and merely
+     * append the reason to the status line so A/B testing can see it. */
+    auto openOrNote = [&detail, tag](const char *name, const char *sub, HKEY &h) {
+        h = NULL;
+        LSTATUS st = RegOpenKeyExA(HKEY_LOCAL_MACHINE, sub, 0, KEY_ALL_ACCESS, &h);
+        if (st != ERROR_SUCCESS) {
+            char b[96];
+            snprintf(b, sizeof(b), " [%s %s: skip, open 0x%08lX]", tag, name, (unsigned long)st);
+            detail += b;
+        }
+    };
+
     /* (a) @0x0040F66E — open general, erase "cachechecksum" */
     HKEY h = NULL;
-    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, general.c_str(), 0, KEY_ALL_ACCESS, &h) == ERROR_SUCCESS) {
+    openOrNote("general", general.c_str(), h);
+    if (h) {
         RegSetValueExA(h, kValCacheChecksum, 0, REG_SZ,
                        (const BYTE *)&kEmptyOneByte, 1); /* @0x0040F68D */
         RegCloseKey(h);                                  /* @0x0040F695 */
     }
     /* (b) @0x0040F6C3 — the original opens the same key a second time,
      *     then erases "serial" */
-    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, general.c_str(), 0, KEY_ALL_ACCESS, &h) == ERROR_SUCCESS) {
+    openOrNote("general(2nd open)", general.c_str(), h);
+    if (h) {
         RegSetValueExA(h, kValSerial, 0, REG_SZ,
                        (const BYTE *)&kEmptyOneByte, 1); /* @0x0040F6E2 */
         RegCloseKey(h);                                  /* @0x0040F6EA */
     }
     /* (c) @0x0040F800 — open diagnostics, erase crash-data*, send-dumps="no" */
-    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, diag.c_str(), 0, KEY_ALL_ACCESS, &h) == ERROR_SUCCESS) {
+    openOrNote("diagnostics", diag.c_str(), h);
+    if (h) {
         RegSetValueExA(h, kValCrashData,  0, REG_SZ,
                        (const BYTE *)&kEmptyOneByte, 1); /* @0x0040F8BE */
         RegSetValueExA(h, kValCrashData1, 0, REG_SZ,
@@ -354,12 +370,12 @@ static bool CsxResetMtaKey(const char *key, std::string &detail)
         RegCloseKey(h);                                  /* @0x0040F90E */
     }
     /* (d) @0x0040F928 — open the version key itself, erase "Last Run Path Hash" */
-    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, key, 0, KEY_ALL_ACCESS, &h) == ERROR_SUCCESS) {
+    openOrNote("(version key)", key, h);
+    if (h) {
         RegSetValueExA(h, kValLastRunPathHash, 0, REG_SZ,
                        (const BYTE *)&kEmptyOneByte, 1); /* @0x0040F947 */
         RegCloseKey(h);                                  /* @0x0040F94F */
     }
-    (void)detail;
     return true;
 }
 
@@ -368,12 +384,13 @@ static bool CsxResetMtaKey(const char *key, std::string &detail)
  * -------------------------------------------------------------------------- */
 CSX_SPOOF_API BOOL CSX_SpooferResetMtaRegValues()
 {
+    const char *tag[2] = { "1.5", "1.6" };
+    std::string detail;
     for (int k = 0; k < 2; ++k) { /* table @0x0040F4E5/0x0040F4EF, 2 entries */
-        std::string d;
-        CsxResetMtaKey(kMtaVersionKeys[k], d);
+        CsxResetMtaKey(kMtaVersionKeys[k], tag[k], detail);
     }
-    SetStatus("ok: MTA 1.5/1.6 values erased (serial, cachechecksum, "
-              "Last Run Path Hash, crash-data1/2) and send-dumps=no");
+    SetStatus(std::string("ok: MTA 1.5/1.6 values erased (serial, cachechecksum, "
+              "Last Run Path Hash, crash-data1/2) and send-dumps=no") + detail);
     return TRUE;
 }
 
@@ -412,21 +429,21 @@ CSX_SPOOF_API BOOL CSX_SpooferResetMtaSerial(HWND hwnd)
  * -------------------------------------------------------------------------- */
 namespace {
 
-bool RegValueExists(HKEY root, const char *sub, const char *value, char *out, DWORD outsz)
+void ProbeVal(HKEY root, const char *sub, const char *value, char *out, DWORD outsz, BOOL *present)
 {
+    *present = FALSE;
+    out[0] = 0;
     HKEY h = NULL;
     if (RegOpenKeyExA(root, sub, 0, KEY_READ, &h) != ERROR_SUCCESS)
-        return false;
-    bool have = false;
+        return;
     DWORD size = outsz;
     DWORD type = 0;
     if (RegQueryValueExA(h, value, NULL, &type, (LPBYTE)out, &size) == ERROR_SUCCESS) {
         if (size >= outsz) size = outsz - 1;
         out[size] = 0;
-        have = true;
+        *present = TRUE;
     }
     RegCloseKey(h);
-    return have;
 }
 
 /* ADS presence: opening "C:\dir:stream" as a file succeeds iff the stream exists */
@@ -486,12 +503,34 @@ CSX_SPOOF_API BOOL CSX_SpooferProbe(CSXResetProbe *out)
     out->mtaReg16Present = (RegOpenKeyExA(HKEY_LOCAL_MACHINE, k16, 0, KEY_READ, &h) == ERROR_SUCCESS) ? TRUE : FALSE;
     if (h) RegCloseKey(h);
 
-    RegValueExists(HKEY_LOCAL_MACHINE,
-                   (std::string(k15) + kSubDiagnostics).c_str(), kValCrashData,
-                   out->mtaReg15CrashData, sizeof(out->mtaReg15CrashData));
-    RegValueExists(HKEY_LOCAL_MACHINE,
-                   (std::string(k16) + kSubDiagnostics).c_str(), kValSendDumps,
-                   out->mtaReg16SendDumps, sizeof(out->mtaReg16SendDumps));
+    /* all seven values of both version keys (exact names of step 6) */
+    const char *vers[2] = { "1.5", "1.6" };
+    for (int v = 0; v < 2; ++v) {
+        const char *k = (v == 0) ? k15 : k16;
+        char *serial  = (v == 0) ? out->serial15  : out->serial16;
+        char *ccsum   = (v == 0) ? out->cacheChecksum15 : out->cacheChecksum16;
+        char *lhash   = (v == 0) ? out->lastRunHash15   : out->lastRunHash16;
+        char *cd      = (v == 0) ? out->crashData15     : out->crashData16;
+        char *cd1     = (v == 0) ? out->crashData1_15   : out->crashData1_16;
+        char *cd2     = (v == 0) ? out->crashData2_15   : out->crashData2_16;
+        char *sd      = (v == 0) ? out->sendDumps15     : out->sendDumps16;
+        BOOL *serialP  = (v == 0) ? &out->serial15Present  : &out->serial16Present;
+        BOOL *ccsumP   = (v == 0) ? &out->cacheChecksum15Present : &out->cacheChecksum16Present;
+        BOOL *lhashP   = (v == 0) ? &out->lastRunHash15Present   : &out->lastRunHash16Present;
+        BOOL *cdP      = (v == 0) ? &out->crashData15Present     : &out->crashData16Present;
+        BOOL *cd1P     = (v == 0) ? &out->crashData1_15Present   : &out->crashData1_16Present;
+        BOOL *cd2P     = (v == 0) ? &out->crashData2_15Present   : &out->crashData2_16Present;
+        BOOL *sdP      = (v == 0) ? &out->sendDumps15Present     : &out->sendDumps16Present;
+        std::string g = std::string(k) + kSubGeneral; /* \Settings\general */
+        std::string d = std::string(k) + kSubDiagnostics; /* \Settings\diagnostics */
+        ProbeVal(HKEY_LOCAL_MACHINE, g.c_str(), kValSerial,        serial,  64, serialP);
+        ProbeVal(HKEY_LOCAL_MACHINE, g.c_str(), kValCacheChecksum, ccsum,   64, ccsumP);
+        ProbeVal(HKEY_LOCAL_MACHINE, k,         kValLastRunPathHash, lhash, 64, lhashP);
+        ProbeVal(HKEY_LOCAL_MACHINE, d.c_str(), kValCrashData,     cd,      64, cdP);
+        ProbeVal(HKEY_LOCAL_MACHINE, d.c_str(), kValCrashData1,    cd1,     64, cd1P);
+        ProbeVal(HKEY_LOCAL_MACHINE, d.c_str(), kValCrashData2,    cd2,     64, cd2P);
+        ProbeVal(HKEY_LOCAL_MACHINE, d.c_str(), kValSendDumps,     sd,      64, sdP);
+    }
 
     return TRUE;
 }

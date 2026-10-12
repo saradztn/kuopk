@@ -255,10 +255,10 @@ InvalidateRect(hwnd, NULL, 0)                                        (IAT 0x0043
 | `csx_spoof/csx_spoof_core.cpp` | إعادة البناء السلوكية: نفس الخطوات السبع بنفس الثوابت |
 | `csx_spoof/csx_spoof.def` | 8 تصديرات (CSX_Spoofer* بترتيبات 1-8) |
 | `csx_spoof/test_csx_spoof.cpp` | أداة اختبار Windows (probe/reset) |
-| `bin/csx_spoof.dll` | SHA-256 `e08a228c225a6050c877dca4c69cbfb45d55ae3705b73b84603f268dcd8366be` (PE32 x86) |
-| `bin/test_csx_spoof.exe` | SHA-256 `314d02153accef9bd6fbd422f7d56858045161abef382d27150be4561dc1e32f` |
+| `bin/csx_spoof.dll` | SHA-256 `692b4cb621aaf7cc0a4062aed6ff2ae64c275c88845b924f5ad388bac5ecc4e2` (PE32 x86) |
+| `bin/test_csx_spoof.exe` | SHA-256 `e1b042b3c6748bf5415b49556b9393e7b0c40826377519619b2f01d4477210e0` |
 | `nrth_ui.cpp` (عدّل) + `build_x86.sh` (عدّل) | الميزة داخل NRTH: زر "Reset MTA Serial (CSX)" في تبويب Other |
-| `bin/NRTH.dll` (مُعاد بناؤه) | SHA-256 `751d0f0fc6f61f1287c753cde1fa9b487aa1773d937403de7d33059663e390cd` — **NVXHookProc بقيت عند RVA 0x0000B9E0** (مطابقة لعقد NRTH الأصلي) |
+| `bin/NRTH.dll` (مُعاد بناؤه) | SHA-256 `95c9d9609f2c297dddba502cec9d00b51ee25b12646d2166a3c77ac74be23053` — **NVXHookProc بقيت عند RVA 0x0000B9E0** (مطابقة لعقد NRTH الأصلي) |
 
 **واجهة csx_spoof.dll:**
 ```c
@@ -290,11 +290,11 @@ const char* CSX_SpooferLastStatus();                  // نص الحالة
   3 إشارات خاطئة داخل `.text` — انظر ملاحظة التحذير أدناه)
 - `re/csx_funcs.json` — 955 بداية دالة مرشحة
 - `re/csx_evidence.json` — جدول الثوابت الكاملة للميزة (VA + نص + موقع push)
-- `dis_40eff0_sso.txt`, `dis_40eff0_loopbody.txt`, `dis_40ec10_regdel.txt`,
-  `dis_40e8c0_cachewrite.txt`, `dis_40f4ff_serialreset.txt`,
-  `dis_403d20_*.txt`, `dis_4027e0_mtafiles.txt`, `dis_413f80_wmi1.txt`,
-  `dis_41be20_wmi2.txt` — تفكيك كامل للدوال
-- أدوات الفحص: `re_csx.py`, `csx_strmap.py`, `csx_funcs.py`
+- `re/dis_40eff0_sso.txt`, `re/dis_40eff0_loopbody.txt`, `re/dis_40ec10_regdel.txt`,
+  `re/dis_40e8c0_cachewrite.txt`, `re/dis_40f4ff_serialreset.txt`,
+  `re/dis_403d20_*.txt`, `re/dis_4027e0_mtafiles.txt`, `re/dis_413f80_wmi1.txt`,
+  `re/dis_41be20_wmi2.txt` — تفكيك كامل للدوال
+- أدوات الفحص: `re/re_csx.py`, `re/csx_strmap.py`, `re/csx_funcs.py`
 
 > **تصحيح مسجل:** استعلامات WMI التي ظهرت في ملاحظات وسيطة بشكل
 > "SELECT * FROM Win32_VideoController WHERE Name='Intel(R) UHD Graphics 630'"

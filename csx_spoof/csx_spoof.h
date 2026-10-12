@@ -144,6 +144,8 @@ extern "C" {
 /* ----------------------------------------------------------------------------
  * Probe structure — read-only mirror of everything the reset touches, so the
  * user can verify before/after state on Windows + MTA:SA.
+ * For every registry value the reset writes, the probe reads the current
+ * value text plus an explicit "present" flag (absent != empty).
  * -------------------------------------------------------------------------- */
 typedef struct _CSXResetProbe {
     BOOL ssoCredentialPresent;   /* generic credential "SSO_RND_Device" (CredReadW) */
@@ -158,8 +160,23 @@ typedef struct _CSXResetProbe {
     BOOL mtaSharedCachePresent;  /* C:\ProgramData\MTA San Andreas All\Common\data\cache */
     BOOL mtaReg15Present;        /* HKLM\SOFTWARE\WOW6432Node\Multi Theft Auto: San Andreas All\1.5 */
     BOOL mtaReg16Present;        /* HKLM\SOFTWARE\WOW6432Node\Multi Theft Auto: San Andreas All\1.6 */
-    char mtaReg15CrashData[64];  /* "crash-data" value in ...\1.5\Settings\diagnostics ("" after reset) */
-    char mtaReg16SendDumps[64];  /* "send-dumps" value in ...\1.6\Settings\diagnostics ("no" after reset) */
+    /* values of ...\<version>\Settings\general   (erased to "" by the reset) */
+    char serial15[64];           BOOL serial15Present;
+    char cacheChecksum15[64];    BOOL cacheChecksum15Present;
+    char serial16[64];           BOOL serial16Present;
+    char cacheChecksum16[64];    BOOL cacheChecksum16Present;
+    /* values of the version key itself           (erased to "" by the reset) */
+    char lastRunHash15[64];      BOOL lastRunHash15Present;   /* "Last Run Path Hash" */
+    char lastRunHash16[64];      BOOL lastRunHash16Present;
+    /* values of ...\<version>\Settings\diagnostics (erased to "" / "no") */
+    char crashData15[64];        BOOL crashData15Present;     /* "crash-data" */
+    char crashData1_15[64];      BOOL crashData1_15Present;   /* "crash-data1" */
+    char crashData2_15[64];      BOOL crashData2_15Present;   /* "crash-data2" */
+    char sendDumps15[64];        BOOL sendDumps15Present;     /* "send-dumps" */
+    char crashData16[64];        BOOL crashData16Present;
+    char crashData1_16[64];      BOOL crashData1_16Present;
+    char crashData2_16[64];      BOOL crashData2_16Present;
+    char sendDumps16[64];        BOOL sendDumps16Present;
 } CSXResetProbe;
 
 /* Destructive steps executed by CSX_SpooferResetMtaSerial (7: the UI step is

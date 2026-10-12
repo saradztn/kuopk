@@ -20,6 +20,24 @@ typedef BOOL (WINAPI *PFN_Clear)(void);
 typedef BOOL (WINAPI *PFN_Probe)(CSXResetProbe *);
 typedef const char *(WINAPI *PFN_Status)(void);
 
+/* print a registry value; distinguish "absent" from "present but empty" and
+ * escape non-printable bytes (serials are long hex; empty = erased) */
+static void ShowVal(const char *label, const char *val, BOOL present)
+{
+    if (!present) {
+        printf("  %-28s <absent>\n", label);
+        return;
+    }
+    printf("  %-28s \"", label);
+    for (const char *c = val; *c; ++c) {
+        if (*c >= 32 && *c < 127)
+            putchar(*c);
+        else
+            printf("\\x%02x", (unsigned char)*c);
+    }
+    printf("\"\n");
+}
+
 static void PrintProbe(CSXResetProbe *p)
 {
     printf("  %-28s %s\n", "SSO_RND_Device credential", p->ssoCredentialPresent ? "PRESENT" : "absent");
@@ -34,8 +52,21 @@ static void PrintProbe(CSXResetProbe *p)
     printf("  %-28s %s\n", "MTA shared data\\cache",     p->mtaSharedCachePresent ? "PRESENT" : "absent");
     printf("  %-28s %s\n", "HKLM ...San Andreas All\\1.5", p->mtaReg15Present ? "PRESENT" : "absent");
     printf("  %-28s %s\n", "HKLM ...San Andreas All\\1.6", p->mtaReg16Present ? "PRESENT" : "absent");
-    printf("  %-28s \"%s\"\n", "1.5 crash-data",          p->mtaReg15CrashData);
-    printf("  %-28s \"%s\"\n", "1.6 send-dumps",          p->mtaReg16SendDumps);
+
+    ShowVal("1.5 general\\serial",         p->serial15,        p->serial15Present);
+    ShowVal("1.5 general\\cachechecksum",  p->cacheChecksum15, p->cacheChecksum15Present);
+    ShowVal("1.5 root\\Last Run Path Hash",p->lastRunHash15,   p->lastRunHash15Present);
+    ShowVal("1.5 diag\\crash-data",        p->crashData15,     p->crashData15Present);
+    ShowVal("1.5 diag\\crash-data1",       p->crashData1_15,   p->crashData1_15Present);
+    ShowVal("1.5 diag\\crash-data2",       p->crashData2_15,   p->crashData2_15Present);
+    ShowVal("1.5 diag\\send-dumps",        p->sendDumps15,     p->sendDumps15Present);
+    ShowVal("1.6 general\\serial",         p->serial16,        p->serial16Present);
+    ShowVal("1.6 general\\cachechecksum",  p->cacheChecksum16, p->cacheChecksum16Present);
+    ShowVal("1.6 root\\Last Run Path Hash",p->lastRunHash16,   p->lastRunHash16Present);
+    ShowVal("1.6 diag\\crash-data",        p->crashData16,     p->crashData16Present);
+    ShowVal("1.6 diag\\crash-data1",       p->crashData1_16,   p->crashData1_16Present);
+    ShowVal("1.6 diag\\crash-data2",       p->crashData2_16,   p->crashData2_16Present);
+    ShowVal("1.6 diag\\send-dumps",        p->sendDumps16,     p->sendDumps16Present);
 }
 
 int main(int argc, char **argv)
