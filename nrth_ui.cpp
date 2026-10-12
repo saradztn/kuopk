@@ -1479,15 +1479,23 @@ static void DrawDumper()
  * appear in the list on every MTA version/build — even on builds where the
  * client-side getElementsByType("player") does not include the local player.
  *
+ * MULTI-VM: the C side fires this script into the default VM AND every
+ * registered VM (resource VMs). PROVEN LIVE (user MTA 1.6): the default
+ * VM lacks client element natives — getElementName is nil there, which
+ * killed the script ("Custom:14: attempt to call global 'getElementName'").
+ * So the script FIRST type-checks its required natives and returns
+ * silently (no writes, no chat) in VMs that lack them; only a full client
+ * resource VM actually runs the enumeration.
+ *
  * Diagnostics (see the Debug section drawn at the bottom of the Player tab):
- *  - the script ALWAYS writes its result: player lines + "#W=<path>" on
- *    success, "ERR:<message>" if the enumeration itself failed, or a
- *    "WERR[<io status> | <fileCreate status>]" prefix if every write attempt
- *    failed (in that case the report goes to the in-game chat only);
- *  - changes are announced via outputChatBox/print in the MTA VM, so the
- *    script's verdict is visible in the game chat (top-left) too;
- *  - C side keeps: last bridge call result, C:\NVX write probe, file
- *    size/mtime, a raw content preview, and any ERR/WERR line.
+ *  - real player data is written to every working path with a "#W=<path>"
+ *    marker; a failed enumeration is announced ONCE per VM in the chat
+ *    ("NRTH: ERR ...") and never written to a file (so a broken VM can
+ *    never clobber a good VM's file);
+ *  - if every write fails, "WERR[<io status> | <fileCreate status>]" goes
+ *    to the in-game chat (top-left) and the F8 console;
+ *  - C side keeps: per-VM call stats, C:\NVX write probe, discovered file
+ *    path/size/mtime, a raw content preview, and any ERR/WERR line.
  *
  * File line format (UTF-8, one player per line):
  *   Y<name>   — local player
@@ -1497,6 +1505,9 @@ static void DrawDumper()
  * =========================================================================== */
 static const char kPlayerListLua[] =
 "pcall(function()\n"
+"if type(getElementName)~='function' or type(getElementsByType)~='function' or type(getLocalPlayer)~='function' then\n"
+" return\n"
+"end\n"
 "local ok,res=pcall(function()\n"
 " local lp=false\n"
 " local okl,lpv=pcall(getLocalPlayer)\n"
@@ -1515,7 +1526,14 @@ static const char kPlayerListLua[] =
 " end\n"
 " return table.concat(out,'\\n')\n"
 "end)\n"
-"local base=ok and res or ('ERR:'..tostring(res))\n"
+"if not ok then\n"
+" if _G.NRTH_PL_ERRDONE then return end\n"
+" _G.NRTH_PL_ERRDONE=true\n"
+" pcall(outputChatBox,'NRTH: ERR '..string.sub(tostring(res),1,60),0)\n"
+" return\n"
+"end\n"
+"if not res or res=='' then return end\n"
+"local base=res\n"
 "local ioe,fce='io-ok','fc-ok'\n"
 "local paths={'C:\\\\NVX\\\\nrth_players.txt','nrth_players.txt'}\n"
 "local wrote=false\n"
@@ -1538,7 +1556,6 @@ static const char kPlayerListLua[] =
 " pcall(print,'NRTH: '..string.sub(report,1,80))\n"
 "end\n"
 "end)\n";
-
 struct PlayerListDiag
 {
     bool   fileFound = false;
@@ -1554,6 +1571,8 @@ struct PlayerListDiag
     size_t scriptLen = 0;
     bool   cProbeTried = false;
     bool   cProbeOk = false;
+    int    vmCount = 0;
+    int    vmLastOk = -1;
     char   mtaRoot[260] = {0};
     char   cwd[260] = {0};
 };
@@ -1747,10 +1766,26 @@ static void PlayerListTick()
     if (now - s_lastWrite >= 1.0) {
         s_lastWrite = now;
         s_plDiag.scriptLen = sizeof(kPlayerListLua) - 1;
-        s_plDiag.bridgeLastOk =
-            NrthUI_ExecuteLuaViaBridge(kPlayerListLua, s_plDiag.scriptLen, 0);
         s_plDiag.bridgeLastTried = true;
         s_plDiag.bridgeLastTime = now;
+        /* Fire into the default VM AND every registered VM (resource VMs).
+         * PROVEN LIVE: the default VM lacks client element natives
+         * (getElementName is nil there — "Custom:14" error), while full
+         * client resource VMs have them. The script self-selects: it
+         * type-checks its natives first and stays completely silent in
+         * VMs that lack them (no file writes, no chat). */
+        const NrthLuaVmBridge *br = Nrth_GetLuaVmBridge();
+        int maxVm = br ? (int)br->slotCount : 0;
+        int vmOk = 0;
+        s_plDiag.vmLastOk = -1;
+        for (int vm = 0; vm <= maxVm; ++vm) {
+            if (NrthUI_ExecuteLuaViaBridge(kPlayerListLua, s_plDiag.scriptLen, vm)) {
+                ++vmOk;
+                s_plDiag.vmLastOk = vm;
+            }
+        }
+        s_plDiag.vmCount = maxVm + 1;
+        s_plDiag.bridgeLastOk = (vmOk > 0);
     }
     PlayerListBuildCandidates(now);
     RefreshPlayerListFromFile();
@@ -1806,6 +1841,10 @@ static void DrawPlayerTab()
                         s_plDiag.bridgeLastTried ? (s_plDiag.bridgeLastOk ? "OK (rc=0)" : "FAIL (rc!=0)") : "never",
                         s_plDiag.bridgeLastTried ? (ImGui::GetTime() - s_plDiag.bridgeLastTime) : -1.0,
                         s_plDiag.scriptLen);
+    ImGui::TextDisabled("vms    : %d fired (default + %d slots), last pcall-ok vm=#%d",
+                        s_plDiag.vmCount,
+                        s_plDiag.vmCount ? s_plDiag.vmCount - 1 : 0,
+                        s_plDiag.vmLastOk);
     ImGui::TextDisabled("cprobe : C:\\NVX write %s",
                         s_plDiag.cProbeTried ? (s_plDiag.cProbeOk ? "OK" : "FAIL") : "not yet");
     ImGui::TextDisabled("mta    : %s", s_plDiag.mtaRoot[0] ? s_plDiag.mtaRoot : "?");
