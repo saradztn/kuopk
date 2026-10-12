@@ -7,8 +7,8 @@ Compiled countermeasure against the **Woofer HWID-spoofing suite**
 
 | File | Arch | Size | SHA-256 |
 |---|---|---|---|
-| `bin/woofer_counter_x64.exe` | x86_64 | 117,248 B | `3abf6f9e636088d96a1737ec2087f82777b7f4a36e547920bf0625cffce1de7f` |
-| `bin/woofer_counter_x86.exe` | x86 | 123,904 B | `50cc2e80dd9739399af1a307da5969d07d74fa4429cc76527d43f748cbff6139` |
+| `bin/woofer_counter_x64.exe` | x86_64 | 117,760 B | `3a2ff0a50011e7d8ed2bdd2b19637b393e7119e08ae979d5dc7c2182f374bedd` |
+| `bin/woofer_counter_x86.exe` | x86 | 124,928 B | `a82af96e775120e32ca5f5d59163ab72bb0eedbaf6e1d8ec063f3b9bbfb568e1` |
 
 Source: `woofer_counter.c` (single self-contained C file) + generated
 fingerprint tables `suite_macs.inc` (504 MACs, exact pool from the suite's
@@ -60,6 +60,8 @@ suite rebuild).
 
 ```
 woofer_counter.exe            (default) scan   full sweep + report file
+woofer_counter.exe scan --fast        fast sweep (exe dir, temp, programdata,
+                              windir temp, downloads — skips APPDATA trees)
 woofer_counter.exe backup     snapshot originals (run BEFORE any suite use)
 woofer_counter.exe clean      kill processes, stop+delete NAL service,
                               delete suite files by hash, remove MAC
@@ -68,6 +70,16 @@ woofer_counter.exe clean      kill processes, stop+delete NAL service,
 woofer_counter.exe clean --reboot   same + automatic reboot
 woofer_counter.exe verify     post-reboot re-check vs backup
 ```
+
+Scan speed notes:
+- The full `scan` walks every AppData tree — on machines with large
+  `AppData\Local` (games, browser caches) this can take several minutes.
+  Use `scan --fast` for a quick pass; the counter never descends into
+  junctions/symlinks (OneDrive) and skips UWP `Packages`, crash dumps and
+  browser-cache directories. Each root scanned is printed as
+  `[..] scanning <path>` so you always see progress.
+- `woofer_counter*` files are excluded from suite-name matching (the
+  counter is not a false positive on itself).
 
 - Run **as Administrator** for `clean` (kills, SCM, registry, PhysicalDrive).
   `scan`/`backup` work mostly un-elevated (disk serials need admin).

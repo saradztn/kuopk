@@ -174,6 +174,8 @@ static int name_looks_suite(const wchar_t *fn){
     for(wchar_t *p=t;*p;p++){ if(*p>='A'&&*p<='Z') *p+=32; }
     int isexe = n>=4 && _wcsicmp(t+n-4, L".exe")==0;
     int issys = n>=4 && _wcsicmp(t+n-4, L".sys")==0;
+    /* the counter itself is not a suite file (its own name starts with "woof") */
+    if(wcsncmp(t, L"woofer_counter", 14)==0) return 0;
     return (wcsncmp(t, L"woof", 4)==0 && isexe)
         || _wcsicmp(t, L"spoofysig.exe")==0 || _wcsicmp(t, L"spoofysig.sys")==0
         || (wcsncmp(t, L"iqvw64", 6)==0 && issys)
@@ -183,9 +185,14 @@ static int name_looks_suite(const wchar_t *fn){
 
 /* ------------------------------------------------------------- file scan */
 static int s_clean = 0;
+static int s_fast  = 0;
 static const wchar_t *SKIP_DIRS[] = {
     L"$RECYCLE.BIN", L"System Volume Information", L".git", L"node_modules",
-    L".cache", L".venv", L".vs", L"AppData\\Local\\Temp"
+    L".cache", L".venv", L".vs", L"AppData\\Local\\Temp",
+    L"Packages",          /* UWP per-app containers — huge, no suite risk */
+    L"CrashDumps",
+    L"Cache", L"CachedData", L"GPUCache", L"Code Cache",
+    L"INetCache", L"IECache", L"FontCache"
 };
 static int skip_dir(const wchar_t *name){
     for(int i=0;i<(int)(sizeof SKIP_DIRS/sizeof SKIP_DIRS[0]);i++)
@@ -207,6 +214,8 @@ static void scan_dir(const wchar_t *dir){
         if((unsigned)wcslen(dir)+3+(unsigned)wcslen(fd.cFileName) >= MAX_PATH) continue;
         wsprintfW(full, L"%s\\%s", dir, fd.cFileName);
         if(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY){
+            /* never descend into junctions/symlinks (OneDrive & loop safety) */
+            if(fd.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) continue;
             if(!(fd.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM) && !skip_dir(fd.cFileName))
                 scan_dir(full);
         } else {
@@ -239,8 +248,11 @@ static void scan_dir(const wchar_t *dir){
     g_walk_depth--;
 }
 static void add_root(const wchar_t *dir){
-    if(dir && dir[0] && GetFileAttributesW(dir)!=INVALID_FILE_ATTRIBUTES)
-        scan_dir(dir);
+    if(!dir || !dir[0]) return;
+    if(GetFileAttributesW(dir)==INVALID_FILE_ATTRIBUTES) return;
+    printf("  [..] scanning %s\n", w2a(dir));
+    if(g_rep){ fprintf(g_rep, "  [..] scanning %s\n", w2a(dir)); fflush(g_rep); }
+    scan_dir(dir);
 }
 static void check_files(int clean){
     s_clean = clean;
@@ -259,8 +271,10 @@ static void check_files(int clean){
     add_root(g_exedir);
     add_root(tmp);
     if(tmp2[0] && _wcsicmp(tmp2, tmp)!=0) add_root(tmp2);
-    add_root(appd);
-    add_root(locald);
+    if(!s_fast){
+        add_root(appd);
+        add_root(locald);
+    }
     add_root(progd);
     add_root(windtmp);
     {   /* C:\Users\*\Downloads */
@@ -278,7 +292,8 @@ static void check_files(int clean){
         }
     }
     if(g_bad==before_bad)
-        say(0, "files", "no suite fingerprints found (exe dir, temp, appdata, programdata, home, downloads)");
+        sayf(0, "files", "no suite fingerprints found (exe dir, temp, programdata, windir temp, downloads%s)",
+             s_fast?")":", appdata)");
     else
         say(2, "files", "suite fingerprints present — see lines above");
 }
@@ -759,6 +774,7 @@ int main(int argc, char **argv){
         else if(strcmp(argv[i], "clean")==0) mode="clean";
         else if(strcmp(argv[i], "verify")==0) mode="verify";
         else if(strcmp(argv[i], "--reboot")==0) reboot=1;
+        else if(strcmp(argv[i], "--fast")==0) s_fast=1;
     }
     printf("=== Woofer suite countermeasure (counter v1) ===\n");
     printf("mode: %s   elevated: %s\n", mode, g_admin?"yes":"no");
