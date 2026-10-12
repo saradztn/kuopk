@@ -1,0 +1,157 @@
+{
+ "Woofer.exe": {
+  "source": "Woofer_unpacked.exe",
+  "label": "Woofer (unpacked image 0x401000 entry; RC4 @0x4011ef)",
+  "size": 143872,
+  "source_sha256": "fc5a27ec16eade55a9a3873a791a2eb0e6832b8d9c0005e83f259f0fcfce7d48",
+  "rebuilt_sha256": "fc5a27ec16eade55a9a3873a791a2eb0e6832b8d9c0005e83f259f0fcfce7d48",
+  "byte_identical": true,
+  "machine": "0x14c",
+  "image_base": "0x400000",
+  "entry_rva": "0x1000",
+  "sections": [
+   [
+    ".code",
+    "0x1000",
+    "0x387e"
+   ],
+   [
+    ".text",
+    "0x5000",
+    "0xd962"
+   ],
+   [
+    ".rdata",
+    "0x13000",
+    "0x33a5"
+   ],
+   [
+    ".data",
+    "0x17000",
+    "0x178c"
+   ],
+   [
+    ".rsrc",
+    "0x19000",
+    "0xd244"
+   ]
+  ],
+  "dos_stub_declared": "DOS stub == standard MSVC constant (written from constant)",
+  "pe_block_bytes_rebuilt": 448,
+  "cert_table": null
+ },
+ "spoofysig.exe": {
+  "source": "spoofysig.exe",
+  "label": "spoofysig.exe (kdmapper, entry 0xf48c, x64)",
+  "size": 136704,
+  "source_sha256": "30ff2e1026e6a6f8c46f8259a1d897735e240fd4ffee6758266929d6a3361fc9",
+  "rebuilt_sha256": "30ff2e1026e6a6f8c46f8259a1d897735e240fd4ffee6758266929d6a3361fc9",
+  "byte_identical": true,
+  "machine": "0x8664",
+  "image_base": "0x140000000",
+  "entry_rva": "0xf48c",
+  "sections": [
+   [
+    ".text",
+    "0x1000",
+    "0xf5f8"
+   ],
+   [
+    ".rdata",
+    "0x11000",
+    "0x102f6"
+   ],
+   [
+    ".data",
+    "0x22000",
+    "0xda0"
+   ],
+   [
+    ".pdata",
+    "0x23000",
+    "0xcd8"
+   ],
+   [
+    ".rsrc",
+    "0x24000",
+    "0x1e8"
+   ],
+   [
+    ".reloc",
+    "0x25000",
+    "0x108"
+   ]
+  ],
+  "dos_stub_declared": "DOS stub carries original link metadata (Rich header / Win32 stub) \u2014 original stub bytes placed, declared",
+  "pe_block_bytes_rebuilt": 504,
+  "cert_table": null
+ },
+ "spoofysig.sys": {
+  "source": "spoofysig.sys",
+  "label": "spoofysig.sys (disk-serial randomizer, entry 0x1530, x64)",
+  "size": 11984,
+  "source_sha256": "93a516ebdd6bb1fe9dc5951b21fbacdff660997548bbb3df57dba92417caa33d",
+  "rebuilt_sha256": "93a516ebdd6bb1fe9dc5951b21fbacdff660997548bbb3df57dba92417caa33d",
+  "byte_identical": true,
+  "machine": "0x8664",
+  "image_base": "0x140000000",
+  "entry_rva": "0x1530",
+  "sections": [
+   [
+    ".text",
+    "0x1000",
+    "0x1bf2"
+   ],
+   [
+    ".rdata",
+    "0x3000",
+    "0x2cc"
+   ],
+   [
+    ".data",
+    "0x4000",
+    "0x10"
+   ],
+   [
+    ".pdata",
+    "0x5000",
+    "0x1c8"
+   ],
+   [
+    "INIT",
+    "0x6000",
+    "0xfc"
+   ]
+  ],
+  "dos_stub_declared": "DOS stub carries original link metadata (Rich header / Win32 stub) \u2014 original stub bytes placed, declared",
+  "pe_block_bytes_rebuilt": 464,
+  "cert_table": "0x2800/0x6d0"
+ },
+ "hwid.ps1": {
+  "source": "hwid.ps1",
+  "label": "hwid.ps1",
+  "size": 3270,
+  "source_sha256": "c7c54526b07f457e58d423ab22d61a0efd78ad112be2ef0a1efe6c25013df185",
+  "rebuilt_sha256": "c7c54526b07f457e58d423ab22d61a0efd78ad112be2ef0a1efe6c25013df185",
+  "byte_identical": true,
+  "kind": "data-file"
+ },
+ "mac.txt": {
+  "source": "mac.txt",
+  "label": "mac.txt",
+  "size": 7054,
+  "source_sha256": "e53a19f0f36d7e7be98522239e8ac2af3248f4fe4b046d9fe270e3907ce11401",
+  "rebuilt_sha256": "e53a19f0f36d7e7be98522239e8ac2af3248f4fe4b046d9fe270e3907ce11401",
+  "byte_identical": true,
+  "kind": "data-file"
+ },
+ "host.txt": {
+  "source": "host.txt",
+  "label": "host.txt",
+  "size": 3158,
+  "source_sha256": "e2c24bcc964b30112eee56d9baacccb05a63dadc5d437d3b9c6304e71167068b",
+  "rebuilt_sha256": "e2c24bcc964b30112eee56d9baacccb05a63dadc5d437d3b9c6304e71167068b",
+  "byte_identical": true,
+  "kind": "data-file"
+ }
+}

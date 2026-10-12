@@ -1,0 +1,2032 @@
+{
+"0x4013ce": {
+"text": "\\$TK;\\$(",
+"enc": "asc",
+"sec": ".code"
+},
+"0x40196f": {
+"text": "PPPPPP",
+"enc": "asc",
+"sec": ".code"
+},
+"0x401ba4": {
+"text": "PPPPPP",
+"enc": "asc",
+"sec": ".code"
+},
+"0x402c58": {
+"text": "PPPPPP",
+"enc": "asc",
+"sec": ".code"
+},
+"0x402e4b": {
+"text": "PPPPPP",
+"enc": "asc",
+"sec": ".code"
+},
+"0x402faf": {
+"text": "PPPPPP",
+"enc": "asc",
+"sec": ".code"
+},
+"0x403c86": {
+"text": "PPPPPP",
+"enc": "asc",
+"sec": ".code"
+},
+"0x404839": {
+"text": "[_;\\$(u",
+"enc": "asc",
+"sec": ".code"
+},
+"0x405642": {
+"text": "t3Ot\"Ot",
+"enc": "asc",
+"sec": ".text"
+},
+"0x405ce0": {
+"text": "D$ PVW",
+"enc": "asc",
+"sec": ".text"
+},
+"0x405ea1": {
+"text": "{_^][Y",
+"enc": "asc",
+"sec": ".text"
+},
+"0x406317": {
+"text": "VW9l$4u",
+"enc": "asc",
+"sec": ".text"
+},
+"0x406320": {
+"text": "D$4$0A",
+"enc": "asc",
+"sec": ".text"
+},
+"0x406335": {
+"text": "\\$89l$<u",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40633f": {
+"text": "D$<$0A",
+"enc": "asc",
+"sec": ".text"
+},
+"0x406360": {
+"text": "L$@9l$D",
+"enc": "asc",
+"sec": ".text"
+},
+"0x406d93": {
+"text": "D$$QVP",
+"enc": "asc",
+"sec": ".text"
+},
+"0x406dba": {
+"text": "D$$QVP",
+"enc": "asc",
+"sec": ".text"
+},
+"0x406de1": {
+"text": "D$$QVP",
+"enc": "asc",
+"sec": ".text"
+},
+"0x406e08": {
+"text": "D$$QVP",
+"enc": "asc",
+"sec": ".text"
+},
+"0x406e7d": {
+"text": "D$$QVP",
+"enc": "asc",
+"sec": ".text"
+},
+"0x406ea4": {
+"text": "D$$QVP",
+"enc": "asc",
+"sec": ".text"
+},
+"0x406ec5": {
+"text": "D$$QVP",
+"enc": "asc",
+"sec": ".text"
+},
+"0x406ee6": {
+"text": "D$$QVP",
+"enc": "asc",
+"sec": ".text"
+},
+"0x406f07": {
+"text": "D$$QVP",
+"enc": "asc",
+"sec": ".text"
+},
+"0x4091b6": {
+"text": "jPjCjnh",
+"enc": "asc",
+"sec": ".text"
+},
+"0x409244": {
+"text": "D$$PVS",
+"enc": "asc",
+"sec": ".text"
+},
+"0x409401": {
+"text": "f9LD6u",
+"enc": "asc",
+"sec": ".text"
+},
+"0x409489": {
+"text": "j\\Xf9D~",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40973a": {
+"text": "QQSUVW",
+"enc": "asc",
+"sec": ".text"
+},
+"0x4097ad": {
+"text": "tcj\"Zf;",
+"enc": "asc",
+"sec": ".text"
+},
+"0x409857": {
+"text": "_^][YY",
+"enc": "asc",
+"sec": ".text"
+},
+"0x409a25": {
+"text": "SUVWj 3",
+"enc": "asc",
+"sec": ".text"
+},
+"0x409a35": {
+"text": "]jD^VP",
+"enc": "asc",
+"sec": ".text"
+},
+"0x409c5f": {
+"text": "t$,t\"h",
+"enc": "asc",
+"sec": ".text"
+},
+"0x409cdb": {
+"text": "D$TPQRU",
+"enc": "asc",
+"sec": ".text"
+},
+"0x409ce3": {
+"text": "t$8RRVR",
+"enc": "asc",
+"sec": ".text"
+},
+"0x409d40": {
+"text": "9|$0tM",
+"enc": "asc",
+"sec": ".text"
+},
+"0x409ed8": {
+"text": "9|$0t@",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40a810": {
+"text": "!~(_^[",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40ae97": {
+"text": "j\\Xf9Ds",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40b026": {
+"text": "j\\Xf9Dw",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40b701": {
+"text": "HtOHt5",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40b7d3": {
+"text": "t9V@Pj",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40b989": {
+"text": "<_^][YY",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40beb6": {
+"text": "3D$H3D$<",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40bef0": {
+"text": "3D$$3D$@",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40bf2d": {
+"text": "3T$(3T$D3T$<",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40bf5e": {
+"text": "3T$,3T$",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40bf98": {
+"text": "3T$03T$",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40bfde": {
+"text": "3T$ 3T$",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c015": {
+"text": "3T$H3T$",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c04c": {
+"text": "3T$$3T$ 3P",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c0b4": {
+"text": "L$X3P$",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c129": {
+"text": "3T$,3P,3P",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c159": {
+"text": "3T$03P03P",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c191": {
+"text": "3P43P ",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c1c6": {
+"text": "3P83P$",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c202": {
+"text": "3P<3P(",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c2da": {
+"text": "3W83W 3W",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c312": {
+"text": "3S<3S$3S",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c350": {
+"text": "13q(3q 3q",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c387": {
+"text": "3q,3q$",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c3d1": {
+"text": "3q03q(3q",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c413": {
+"text": "3q43q,3q ",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c455": {
+"text": "3q83q03q$",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c490": {
+"text": "q<3q43q(3q",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c4d5": {
+"text": "13q83q,3q",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c515": {
+"text": "3q<3q03q",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c550": {
+"text": "313q43q ",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c599": {
+"text": "3q83q$",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c5db": {
+"text": "3q<3q(",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c6d8": {
+"text": "3r83r 3r",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c71f": {
+"text": "3r<3r$3r",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c767": {
+"text": "13q(3q 3q",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c7a7": {
+"text": "3q,3q$3q",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c805": {
+"text": "3p43p,3p ",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c857": {
+"text": "3P83P03P$",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c982": {
+"text": "3P83P$",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40c9b2": {
+"text": "3P<3P(",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40ca1d": {
+"text": "D$h3H03H",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40cada": {
+"text": "\\$03\\$X3\\$",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40caf5": {
+"text": "3P(3P ",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40cb36": {
+"text": "l$X3P,3P$3P",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40cb70": {
+"text": "3T$L3T$D3P",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40cba7": {
+"text": "3T$H3T$@3P ",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40cbe1": {
+"text": "3P83T$L",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40cc0e": {
+"text": "P(3P<3T$H3P",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40cc71": {
+"text": "D$,3A<3A",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40ccfd": {
+"text": "?vMj@[+",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40e0de": {
+"text": "t+h$7A",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40f1df": {
+"text": "wI;O(wDj",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40f4f0": {
+"text": "D$DRSP",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40f578": {
+"text": "WD;P s",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40f60a": {
+"text": "s@u';i",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40f6ae": {
+"text": "WD;P(s",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40faee": {
+"text": "Gl;G`sX",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40fb46": {
+"text": "Gl;G`r",
+"enc": "asc",
+"sec": ".text"
+},
+"0x40fcdd": {
+"text": "M;t$Dr",
+"enc": "asc",
+"sec": ".text"
+},
+"0x410064": {
+"text": "T$8#\\$",
+"enc": "asc",
+"sec": ".text"
+},
+"0x410262": {
+"text": "T$8#\\$",
+"enc": "asc",
+"sec": ".text"
+},
+"0x410442": {
+"text": "|$ 9OD",
+"enc": "asc",
+"sec": ".text"
+},
+"0x4104bd": {
+"text": "D$(+D$",
+"enc": "asc",
+"sec": ".text"
+},
+"0x4104da": {
+"text": "D$(+D$,",
+"enc": "asc",
+"sec": ".text"
+},
+"0x4106f8": {
+"text": "D$,^][_",
+"enc": "asc",
+"sec": ".text"
+},
+"0x4107bb": {
+"text": "t@90u<",
+"enc": "asc",
+"sec": ".text"
+},
+"0x410978": {
+"text": "t}9;uy",
+"enc": "asc",
+"sec": ".text"
+},
+"0x410c5c": {
+"text": "N,9N4u",
+"enc": "asc",
+"sec": ".text"
+},
+"0x410c74": {
+"text": "F0][_3",
+"enc": "asc",
+"sec": ".text"
+},
+"0x41195d": {
+"text": "D$(@bA",
+"enc": "asc",
+"sec": ".text"
+},
+"0x411b02": {
+"text": "t$H;t$<",
+"enc": "asc",
+"sec": ".text"
+},
+"0x41269b": {
+"text": "_^][YY",
+"enc": "asc",
+"sec": ".text"
+},
+"0x41275e": {
+"text": "ntdll.dll",
+"enc": "u16",
+"sec": ".text"
+},
+"0x41278a": {
+"text": "2147483648",
+"enc": "u16",
+"sec": ".text"
+},
+"0x4127a2": {
+"text": "InputRequester",
+"enc": "u16",
+"sec": ".text"
+},
+"0x4127c2": {
+"text": "STATIC",
+"enc": "u16",
+"sec": ".text"
+},
+"0x4127e6": {
+"text": "BUTTON",
+"enc": "u16",
+"sec": ".text"
+},
+"0x4127f6": {
+"text": "SHELL32.DLL",
+"enc": "u16",
+"sec": ".text"
+},
+"0x4128ec": {
+"text": "AInvalid memory access",
+"enc": "u16",
+"sec": ".text"
+},
+"0x41291a": {
+"text": "Array bounds exceeded",
+"enc": "u16",
+"sec": ".text"
+},
+"0x412946": {
+"text": "Debugger breakpoint reached",
+"enc": "u16",
+"sec": ".text"
+},
+"0x41297e": {
+"text": "Misaligned data access",
+"enc": "u16",
+"sec": ".text"
+},
+"0x4129ae": {
+"text": "Denormal floating-point operand",
+"enc": "u16",
+"sec": ".text"
+},
+"0x4129ee": {
+"text": "Division by zero (floating-point)",
+"enc": "u16",
+"sec": ".text"
+},
+"0x413014": {
+"text": "RtlGetVersion",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x413032": {
+"text": "Inexact floating-point result",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x41306e": {
+"text": "Invalid floating-point operation",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x4130b0": {
+"text": "SHBrowseForFolderW",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x4130b6": {
+"text": "Floating-point overflow (exponent to great)",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x4130c4": {
+"text": "SHGetPathFromIDListW",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x41310e": {
+"text": "Floating-point stack overflow or underflow",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x413166": {
+"text": "Floating-point underflow (exponent too small)",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x4131c2": {
+"text": "Illegal instruction",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x4131ea": {
+"text": "Memory page error",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x41320e": {
+"text": "Division by zero ",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x413232": {
+"text": "Integer overflow",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x413256": {
+"text": "Exception handler returned unknown value",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x4132ae": {
+"text": "Exception handler tried to continue after non-continuable exception",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x413336": {
+"text": "Privileged instruction",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x413366": {
+"text": "Single step trap",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x41338a": {
+"text": "Stack overflow",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x4133aa": {
+"text": "Unknown error code",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x4133d2": {
+"text": "Kernel32.DLL",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x413402": {
+"text": "Shell32.DLL",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x413436": {
+"text": "Downloads\\",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x413466": {
+"text": "Kernel32.dll",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x413690": {
+"text": "GetLongPathNameW",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x4136bc": {
+"text": "SHGetKnownFolderPath",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x4136f8": {
+"text": "0123456789abcdefK",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x413724": {
+"text": "InitOnceExecuteOnce",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x413738": {
+"text": "1.2.11",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x413fe8": {
+"text": "incorrect header check",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x414000": {
+"text": "unknown compression method",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x41401c": {
+"text": "invalid window size",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x414030": {
+"text": "unknown header flags set",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x41404c": {
+"text": "header crc mismatch",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x414060": {
+"text": "invalid block type",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x414074": {
+"text": "invalid stored block lengths",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x414094": {
+"text": "too many length or distance symbols",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x4140b8": {
+"text": "invalid code lengths set",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x4140d4": {
+"text": "invalid bit length repeat",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x4140f0": {
+"text": "invalid code -- missing end-of-block",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x414118": {
+"text": "invalid literal/lengths set",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x414134": {
+"text": "invalid distances set",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x41414c": {
+"text": "invalid literal/length code",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x414168": {
+"text": "invalid distance code",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x414180": {
+"text": "invalid distance too far back",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x4141a0": {
+"text": "incorrect data check",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x4141b8": {
+"text": "incorrect length check",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x414311": {
+"text": "Qkkbal",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x414a9d": {
+"text": "[-&LMb#{'",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x414ae3": {
+"text": "w+OQvr",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x414bc6": {
+"text": ")\\ZEo^m/",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x414e97": {
+"text": "H*0\"ZOW",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x4153f9": {
+"text": "mj>zjZ",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x415568": {
+"text": "IiGM>nw",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x41578d": {
+"text": "ewh/?y",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x415e4e": {
+"text": "#+3;CScs",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x415e7a": {
+"text": "OZw3(?",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x415ffa": {
+"text": "V_:X1:",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x416070": {
+"text": "sysnative",
+"enc": "u16",
+"sec": ".rdata"
+},
+"0x4161d0": {
+"text": " inflate 1.2.11 Copyright 1995-2017 Mark Adler ",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x416328": {
+"text": "need dictionary",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x416338": {
+"text": "stream end",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x416344": {
+"text": "file error",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x416350": {
+"text": "stream error",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x416360": {
+"text": "data error",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x41636c": {
+"text": "insufficient memory",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x416380": {
+"text": "buffer error",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x416390": {
+"text": "incompatible version",
+"enc": "asc",
+"sec": ".rdata"
+},
+"0x4176ae": {
+"text": "memset",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4176b6": {
+"text": "MSVCRT.dll",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4176c4": {
+"text": "GetModuleHandleW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4176d8": {
+"text": "HeapCreate",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4176e6": {
+"text": "GetStdHandle",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4176f6": {
+"text": "SetConsoleCtrlHandler",
+"enc": "asc",
+"sec": ".data"
+},
+"0x41770e": {
+"text": "HeapDestroy",
+"enc": "asc",
+"sec": ".data"
+},
+"0x41771c": {
+"text": "ExitProcess",
+"enc": "asc",
+"sec": ".data"
+},
+"0x41772a": {
+"text": "WriteFile",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417736": {
+"text": "GetTempFileNameW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x41774a": {
+"text": "LoadLibraryExW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x41775c": {
+"text": "EnumResourceTypesW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417772": {
+"text": "FreeLibrary",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417780": {
+"text": "RemoveDirectoryW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417794": {
+"text": "EnumResourceNamesW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4177aa": {
+"text": "GetCommandLineW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4177bc": {
+"text": "LoadResource",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4177cc": {
+"text": "SizeofResource",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4177de": {
+"text": "FreeResource",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4177ee": {
+"text": "FindResourceW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4177fe": {
+"text": "GetNativeSystemInfo",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417814": {
+"text": "GetShortPathNameW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417828": {
+"text": "GetWindowsDirectoryW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417840": {
+"text": "GetSystemDirectoryW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417854": {
+"text": "KERNEL32.DLL",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417864": {
+"text": "wcsncmp",
+"enc": "asc",
+"sec": ".data"
+},
+"0x41786e": {
+"text": "memmove",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417878": {
+"text": "wcsncpy",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417882": {
+"text": "wcsstr",
+"enc": "asc",
+"sec": ".data"
+},
+"0x41788c": {
+"text": "_wcsnicmp",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417898": {
+"text": "_wcsdup",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4178aa": {
+"text": "_wcsicmp",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4178b6": {
+"text": "wcslen",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4178c0": {
+"text": "wcscpy",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4178ca": {
+"text": "wcscmp",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4178d4": {
+"text": "wcscat",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4178de": {
+"text": "memcpy",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4178e8": {
+"text": "tolower",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4178f2": {
+"text": "malloc",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4178fc": {
+"text": "EnterCriticalSection",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417914": {
+"text": "CloseHandle",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417922": {
+"text": "LeaveCriticalSection",
+"enc": "asc",
+"sec": ".data"
+},
+"0x41793a": {
+"text": "InitializeCriticalSection",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417956": {
+"text": "WaitForSingleObject",
+"enc": "asc",
+"sec": ".data"
+},
+"0x41796c": {
+"text": "TerminateThread",
+"enc": "asc",
+"sec": ".data"
+},
+"0x41797e": {
+"text": "CreateThread",
+"enc": "asc",
+"sec": ".data"
+},
+"0x41798e": {
+"text": "GetProcAddress",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4179a0": {
+"text": "GetVersionExW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4179b8": {
+"text": "WideCharToMultiByte",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4179ce": {
+"text": "HeapAlloc",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4179da": {
+"text": "HeapFree",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4179e6": {
+"text": "LoadLibraryW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x4179f6": {
+"text": "GetCurrentProcessId",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417a0c": {
+"text": "GetCurrentThreadId",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417a22": {
+"text": "GetModuleFileNameW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417a38": {
+"text": "PeekNamedPipe",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417a48": {
+"text": "TerminateProcess",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417a5c": {
+"text": "GetEnvironmentVariableW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417a76": {
+"text": "SetEnvironmentVariableW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417a90": {
+"text": "GetCurrentProcess",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417aa4": {
+"text": "DuplicateHandle",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417ab6": {
+"text": "CreatePipe",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417ac4": {
+"text": "CreateProcessW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417ad6": {
+"text": "GetExitCodeProcess",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417aec": {
+"text": "SetUnhandledExceptionFilter",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417b0a": {
+"text": "HeapSize",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417b16": {
+"text": "MultiByteToWideChar",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417b2c": {
+"text": "CreateDirectoryW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417b40": {
+"text": "SetFileAttributesW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417b56": {
+"text": "GetTempPathW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417b66": {
+"text": "DeleteFileW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417b74": {
+"text": "GetCurrentDirectoryW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417b8c": {
+"text": "SetCurrentDirectoryW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417ba4": {
+"text": "CreateFileW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417bb2": {
+"text": "SetFilePointer",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417bc4": {
+"text": "TlsFree",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417bce": {
+"text": "TlsGetValue",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417bdc": {
+"text": "TlsSetValue",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417bea": {
+"text": "TlsAlloc",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417bf6": {
+"text": "HeapReAlloc",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417c04": {
+"text": "DeleteCriticalSection",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417c1c": {
+"text": "InterlockedCompareExchange",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417c3a": {
+"text": "InterlockedExchange",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417c50": {
+"text": "GetLastError",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417c60": {
+"text": "SetLastError",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417c70": {
+"text": "UnregisterWait",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417c82": {
+"text": "GetCurrentThread",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417c96": {
+"text": "RegisterWaitForSingleObject",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417cb4": {
+"text": "CharUpperW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417cc2": {
+"text": "CharLowerW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417cd0": {
+"text": "MessageBoxW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417cde": {
+"text": "DefWindowProcW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417cf0": {
+"text": "DestroyWindow",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417d00": {
+"text": "GetWindowLongW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417d12": {
+"text": "GetWindowTextLengthW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417d2a": {
+"text": "GetWindowTextW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417d3c": {
+"text": "UnregisterClassW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417d50": {
+"text": "LoadIconW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417d5c": {
+"text": "LoadCursorW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417d6a": {
+"text": "RegisterClassExW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417d7e": {
+"text": "IsWindowEnabled",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417d90": {
+"text": "EnableWindow",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417da0": {
+"text": "GetSystemMetrics",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417db4": {
+"text": "CreateWindowExW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417dc6": {
+"text": "SetWindowLongW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417dd8": {
+"text": "SendMessageW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417de8": {
+"text": "SetFocus",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417df4": {
+"text": "CreateAcceleratorTableW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417e0e": {
+"text": "SetForegroundWindow",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417e24": {
+"text": "BringWindowToTop",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417e38": {
+"text": "GetMessageW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417e46": {
+"text": "TranslateAcceleratorW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417e5e": {
+"text": "TranslateMessage",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417e72": {
+"text": "DispatchMessageW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417e86": {
+"text": "DestroyAcceleratorTable",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417ea0": {
+"text": "PostMessageW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417eb0": {
+"text": "GetForegroundWindow",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417ec6": {
+"text": "GetWindowThreadProcessId",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417ee2": {
+"text": "IsWindowVisible",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417ef4": {
+"text": "EnumWindows",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417f02": {
+"text": "SetWindowPos",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417f10": {
+"text": "USER32.DLL",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417f1e": {
+"text": "GetStockObject",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417f2e": {
+"text": "GDI32.DLL",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417f3a": {
+"text": "InitCommonControlsEx",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417f50": {
+"text": "COMCTL32.DLL",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417f60": {
+"text": "ShellExecuteExW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417f72": {
+"text": "SHGetFolderLocation",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417f88": {
+"text": "SHGetPathFromIDListW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417f9e": {
+"text": "SHELL32.DLL",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417fac": {
+"text": "timeBeginPeriod",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417fbc": {
+"text": "WINMM.DLL",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417fc8": {
+"text": "CoInitialize",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417fd8": {
+"text": "CoTaskMemFree",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417fe6": {
+"text": "OLE32.DLL",
+"enc": "asc",
+"sec": ".data"
+},
+"0x417fee": {
+"text": " 01B9D532D7811526F0B7C862B06F6F6E",
+"enc": "u16",
+"sec": ".data"
+},
+"0x417ff2": {
+"text": "PathAddBackslashW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x418006": {
+"text": "PathRenameExtensionW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x41801e": {
+"text": "PathQuoteSpacesW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x418032": {
+"text": "1E80BB1738(3F4CD4E5FD0F31D493E8AF9CFD0A3B145AF054B8 EFC86EF7677FA9934EF305EC6F89E07C",
+"enc": "u16",
+"sec": ".data"
+},
+"0x418044": {
+"text": "PathRemoveBackslashW",
+"enc": "asc",
+"sec": ".data"
+},
+"0x41805a": {
+"text": "SHLWAPI.DLL",
+"enc": "asc",
+"sec": ".data"
+},
+"0x419303": {
+"text": "HPTTP[",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x419872": {
+"text": "azTp/K",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x419c9e": {
+"text": "T~FOT`",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x419f9c": {
+"text": "IFi'yy",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41a23e": {
+"text": "K>UwA$",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41a2dd": {
+"text": "zMg=5i'",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41a448": {
+"text": "U0J~&a<n",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41a4e0": {
+"text": "k`3FeR",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41a684": {
+"text": "8+8\\[nS",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41a74f": {
+"text": "ob)<{*",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41a96a": {
+"text": "O~V2HYo",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41aff3": {
+"text": "#E9.d!",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41b1d6": {
+"text": ".-?>yl",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41b1e1": {
+"text": "#F4#Om",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41b29f": {
+"text": "^C%fnT~",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41b56e": {
+"text": "AFe!S/b",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41bee8": {
+"text": "=E9UV.",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41bf67": {
+"text": "I%wjIt",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41c09c": {
+"text": "W0_>_hk",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41c41d": {
+"text": "84u=&f",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41c7a2": {
+"text": "h*f6oaB",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41cb79": {
+"text": "8dkX}wH",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41cec4": {
+"text": "3d]|ZG",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41cf7b": {
+"text": "+,6.F9",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41d02b": {
+"text": "TexR'V",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41d2d5": {
+"text": "sSz^}JG",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41e58e": {
+"text": "R~X[ip",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41e6cb": {
+"text": "Y~4x<-",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41eb75": {
+"text": "Q}?MEi",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41f295": {
+"text": "9N6MK>",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41f86c": {
+"text": "@4vc'O",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41fa57": {
+"text": "DAY-0D",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41fdbb": {
+"text": "m6nRN1",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41fe06": {
+"text": "6dPidoM;",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41fe8c": {
+"text": "h>z0!T",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x41fefb": {
+"text": "d.bmveJ",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x42074b": {
+"text": "^I7{*&",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x4208ed": {
+"text": "^Y{SDq",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x4209fb": {
+"text": "A+h\\7)i",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x420d7b": {
+"text": "d1D\"\"n",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x4210fe": {
+"text": "3u4s_Z",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x421113": {
+"text": "H7Bh4W",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x4211a2": {
+"text": ")&+)6.e",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x421219": {
+"text": "HIj!sq",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x4214c0": {
+"text": ">}4E|Q",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x421c52": {
+"text": "?G@+FthpY",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x421dfe": {
+"text": "G]-%GX-",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x42208b": {
+"text": "MCQCIO3R",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x422237": {
+"text": "kie!WWj7",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x422255": {
+"text": "ImPiG>",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x4225ec": {
+"text": "7HIw\"d",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x4229ef": {
+"text": "Ch1z}^",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x422c0f": {
+"text": "D<(Ry30",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x422d36": {
+"text": "@wY[zW",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x423065": {
+"text": "|}KpN}",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x4232cb": {
+"text": "XokJx&",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x423392": {
+"text": "\\'L&+q",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x42366a": {
+"text": "/ /9/E",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x423759": {
+"text": "fL3pNu",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x424169": {
+"text": "&oz$'gW",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x4241d5": {
+"text": ":*Nz=`g",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x4243f3": {
+"text": "@S1sxOd",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x424523": {
+"text": "gPTM^2'",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x4246cc": {
+"text": "sa!7oM",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x424863": {
+"text": "H}/P@,",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x424a27": {
+"text": "RqKeDy",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x424e55": {
+"text": "K_DG=5",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x424ea1": {
+"text": "dk{y,=q",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x424f8e": {
+"text": "&b#VR2p",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x42508e": {
+"text": "~UhitH.B",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x4250f5": {
+"text": "@H}q@?K",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x42514d": {
+"text": "Ywbff*C",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x425ab5": {
+"text": "vFz&RF",
+"enc": "asc",
+"sec": ".rsrc"
+},
+"0x425fa4": {
+"text": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?> <assembly xmlns=\"urn:schemas-microsoft-com:asm.v1\" manifestVersion=\"1.0\"> <dependency> <dependentAssembly> <assemblyIdentity type=\"win32\" name=\"Microsoft.Windows.Common-Controls\" version=\"6.0.0.0\" processorArchitecture=\"*\" publicKeyToken=\"6595b64144ccf1df\" language=\"*\" /> </dependentAssembly> </dependency> <v3:trustInfo xmlns:v3=\"urn:schemas-microsoft-com:asm.v3\"> <v3:security> <v3:requestedPrivileges> <!-- level can be \"asInvoker\", \"highestAvailable\", or \"requireAdministrator\" --> <v3:requestedExecutionLevel level=\"requireAdministrator\" /> </v3:requestedPrivileges> </v3:security> </v3:trustInfo> </assembly> ",
+"enc": "asc",
+"sec": ".rsrc"
+}
+}
