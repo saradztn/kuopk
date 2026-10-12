@@ -1,0 +1,186 @@
+slots total: 185 mapped: 182 unmapped: 3
+
+AcquireSRWLockExclusive            (4x): 0xe9b0 0xe9d2 0xeb00 0xeb6c
+BeginPaint                         (1x): 0xa964
+BitBlt                             (1x): 0xa87e
+CheckRemoteDebuggerPresent         (1x): 0xb1bb
+CloseHandle                        (17x): 0x245a 0x272d 0x4feb 0x51ce 0x66e8 0x678f 0x79ec 0x862e 0x8d77 0xb41c 0xb4bf 0xe87f 0x174a3 0x175c4 0x22a2e 0x232b1 0x23311
+CoTaskMemFree                      (1x): 0x7b05
+CreateCompatibleBitmap             (1x): 0xa2ed
+CreateCompatibleDC                 (1x): 0xa2db
+CreateDirectoryW                   (1x): 0x7ba3
+CreateFileW                        (6x): 0x232e 0x4a46 0x5185 0x648f 0x23282 0x2333c
+CreateMutexW                       (1x): 0xb3fe
+CreateRemoteThread                 (1x): 0x2688
+CreateSolidBrush                   (1x): 0xb9b9
+CreateThread                       (1x): 0x175a0
+CreateToolhelp32Snapshot           (2x): 0x7950 0xb447
+CreateWindowExW                    (1x): 0xbb04
+DefWindowProcW                     (1x): 0xab76
+DeleteCriticalSection              (5x): 0x14003 0x18071 0x1c1c7 0x1c62f 0x1de55
+DeleteDC                           (1x): 0xa8a0
+DeleteFileW                        (6x): 0x21bf 0x593e 0x59af 0x5c5c 0x8c6e 0x8ce1
+DeleteObject                       (1x): 0xa897
+DestroyWindow                      (2x): 0xac97 0xad50
+DispatchMessageW                   (1x): 0xbc04
+EncodePointer                      (2x): 0x121d3 0x1244c
+EndPaint                           (1x): 0xa97c
+EnterCriticalSection               (3x): 0x180a0 0x1c5fa 0x1df44
+ExitProcess                        (2x): 0xbcba 0x18546
+ExitThread                         (2x): 0x17416 0x174c2
+FindClose                          (3x): 0x221e 0x1c8e2 0x1c920
+FindFirstFileExW                   (1x): 0x1c81c
+FindFirstFileW                     (1x): 0x20cb
+FindNextFileW                      (2x): 0x220d 0x1c8a5
+FlsAlloc                           (1x): 0x1ba94
+FlsFree                            (1x): 0x1ba9c
+FlsGetValue                        (1x): 0x1baa4
+FlsSetValue                        (1x): 0x1bab8
+FlushFileBuffers                   (1x): 0x206d2
+FreeEnvironmentStringsW            (1x): 0x1da42
+FreeLibrary                        (5x): 0x141e7 0x175d3 0x185a7 0x1b9ba 0x1bd5f
+FreeLibraryAndExitThread           (1x): 0x174b9
+GdipAddPathArcI                    (4x): 0x34a8 0x34e3 0x3517 0x3544
+GdipAddPathRectangleI              (2x): 0x3430 0x3460
+GdipAlloc                          (2x): 0x10ac 0x33e9
+GdipCloneBrush                     (1x): 0x109a
+GdipClosePathFigure                (1x): 0x355e
+GdipCreateFont                     (1x): 0xa5a9
+GdipCreateFontFamilyFromName       (1x): 0xa57e
+GdipCreateFromHDC                  (1x): 0xa31b
+GdipCreatePath                     (1x): 0x340b
+GdipCreatePen1                     (2x): 0xa448 0xa75a
+GdipCreateSolidFill                (5x): 0xa38b 0xa40f 0xa5bc 0xa723 0xa819
+GdipCreateStringFormat             (1x): 0xa5fd
+GdipDeleteBrush                    (8x): 0x10f4 0x112d 0x117e 0xa498 0xa689 0xa7a2 0xa84c 0xa8ab
+GdipDeleteFont                     (1x): 0xa693
+GdipDeleteFontFamily               (1x): 0xa69d
+GdipDeleteGraphics                 (2x): 0x1193 0xa8b5
+GdipDeletePath                     (3x): 0xa47b 0xa77b 0xa83a
+GdipDeletePen                      (2x): 0xa48e 0xa799
+GdipDeleteStringFormat             (1x): 0xa680
+GdipDrawPath                       (3x): 0xa465 0xa772 0xa78f
+GdipDrawString                     (1x): 0xa676
+GdipFillPath                       (3x): 0xa41f 0xa736 0xa82c
+GdipFillRectangleI                 (1x): 0xa3b2
+GdipFree                           (4x): 0x1142 0xa484 0xa784 0xa843
+GdipSetPixelOffsetMode             (1x): 0xa346
+GdipSetSmoothingMode               (1x): 0xa333
+GdipSetStringFormatAlign           (1x): 0xa60f
+GdipSetStringFormatLineAlign       (1x): 0xa626
+GdipSetTextRenderingHint           (1x): 0xa359
+GdiplusShutdown                    (3x): 0xba16 0xbb1d 0xbc2a
+GdiplusStartup                     (1x): 0xb67b
+GetACP                             (1x): 0x1ce55
+GetCPInfo                          (2x): 0x1cf7c 0x1d58b
+GetClientRect                      (1x): 0xa2c0
+GetCommandLineA                    (1x): 0x1d7a4
+GetCommandLineW                    (1x): 0x1d7b1
+GetConsoleMode                     (1x): 0x2120e
+GetConsoleOutputCP                 (1x): 0x20823
+GetCurrentProcess                  (4x): 0xb1ae 0xf4b6 0x17096 0x1852c
+GetCurrentProcessId                (1x): 0xf915
+GetCurrentThread                   (1x): 0xb209
+GetCurrentThreadId                 (3x): 0xe894 0xe991 0xf909
+GetEnvironmentStringsW             (1x): 0x1d9d8
+GetExitCodeThread                  (1x): 0x2724
+GetFileAttributesExW               (2x): 0x6731 0x82f8
+GetFileAttributesW                 (2x): 0x5773 0x7f9a
+GetFileType                        (2x): 0x1b4bf 0x1b5b3
+GetLastError                       (23x): 0x57da 0xb40c 0x10d10 0x1414f 0x159f4 0x16ce0 0x16d4c 0x1740e 0x175ae 0x19700 0x1b147 0x1b301 0x1b8a7 0x206de 0x20c05 0x20d0c 0x20e28 0x20f99 0x212a0 0x21370
+GetMessageW                        (2x): 0xbbe6 0xbc19
+GetModuleFileNameW                 (2x): 0xb290 0x18884
+GetModuleHandleExW                 (2x): 0x17514 0x18575
+GetModuleHandleW                   (5x): 0x25e6 0xb1e6 0xe8ad 0xf7fa 0x18463
+GetOEMCP                           (1x): 0x1ce3e
+GetProcAddress                     (7x): 0x25f6 0xb1fb 0xe8c0 0xe8d7 0x141f3 0x1858b 0x1b9c6
+GetProcessHeap                     (1x): 0x1db24
+GetStartupInfoW                    (2x): 0xf7c0 0x1b454
+GetStdHandle                       (1x): 0x1b59d
+GetStringTypeW                     (2x): 0x1e50a 0x204c0
+GetSystemMetrics                   (2x): 0xba9d 0xbaa7
+GetSystemTimeAsFileTime            (2x): 0xe90c 0xf8fb
+GetTickCount64                     (1x): 0x57ee
+HeapAlloc                          (2x): 0x1977e 0x1b805
+HeapFree                           (1x): 0x196f6
+HeapReAlloc                        (1x): 0x21d2d
+HeapSize                           (1x): 0x21ca2
+InitializeCriticalSectionAndSpinCount (1x): 0x14383
+InitializeCriticalSectionEx        (1x): 0x1bac0
+InitializeSListHead                (1x): 0xf98b
+InvalidateRect                     (5x): 0x7925 0x846b 0x873b 0xaadb 0xad17
+IsDebuggerPresent                  (3x): 0xb199 0xf753 0x16e93
+IsProcessorFeaturePresent          (4x): 0xf4de 0xf674 0x17071 0x17ed2
+IsValidCodePage                    (1x): 0x1d547
+KillTimer                          (2x): 0xa98c 0xad47
+LCMapStringW                       (1x): 0x1bb9f
+LeaveCriticalSection               (3x): 0x180ac 0x1c65a 0x1df6c
+LoadCursorW                        (1x): 0xb9aa
+LoadIconW                          (2x): 0xb9e1 0xb9f2
+LoadLibraryExW                     (4x): 0x14141 0x14179 0x1b895 0x1b8e9
+MessageBoxW                        (5x): 0xac4e 0xb5bd 0xb6c5 0xba4d 0xbb54
+MoveFileExW                        (6x): 0x579e 0x57cc 0x5965 0x5993 0x59cf 0x5ae0
+MultiByteToWideChar                (3x): 0x51f7 0x524b 0x1d8a5
+OpenProcess                        (1x): 0x85f9
+PostMessageW                       (6x): 0x6642 0x676c 0x826a 0x864e 0x883f 0x24c8b
+PostQuitMessage                    (1x): 0xa994
+Process32FirstW                    (2x): 0x799b 0xb486
+Process32NextW                     (2x): 0x79cf 0xb4ad
+QueryPerformanceCounter            (2x): 0xd9b9 0xf925
+QueryPerformanceFrequency          (1x): 0xd9e1
+RaiseException                     (4x): 0x10a19 0x13181 0x133b8 0x236f0
+ReadFile                           (3x): 0x2385 0x23fd 0x51c5
+RegisterClassExW                   (1x): 0xba00
+ReleaseSRWLockExclusive            (3x): 0xe959 0xeb40 0xebd0
+RtlCaptureContext                  (3x): 0xf5af 0xf6a1 0x16e07
+RtlLookupFunctionEntry             (4x): 0xf5c9 0xf6bb 0xfdd4 0x16e1f
+RtlPcToFileHeader                  (1x): 0x109d8
+RtlUnwindEx                        (3x): 0x10210 0x10330 0x10b90
+RtlVirtualUnwind                   (3x): 0xf603 0xf6ff 0x16e5a
+SHGetKnownFolderPath               (1x): 0x7a86
+SelectObject                       (2x): 0xa2fe 0xa88c
+SetErrorMode                       (1x): 0xb193
+SetFilePointerEx                   (2x): 0x23bf 0x21472
+SetFileTime                        (1x): 0x66dd
+SetLastError                       (7x): 0x10d97 0x15a28 0x16d15 0x16d5c 0x1b166 0x1b1d4 0x1b334
+SetLayeredWindowAttributes         (1x): 0xa9ad
+SetProcessMitigationPolicy         (2x): 0xb23d 0xb259
+SetStdHandle                       (1x): 0x1dfee
+SetTimer                           (1x): 0xa9c4
+SetUnhandledExceptionFilter        (4x): 0xf4a7 0xf770 0xf84f 0x16e9d
+ShellExecuteExW                    (1x): 0xb3ba
+ShowWindow                         (1x): 0xbbb0
+Sleep                              (1x): 0xe760
+SleepConditionVariableSRW          (1x): 0xeb94
+SystemTimeToFileTime               (1x): 0x66c5
+TerminateProcess                   (3x): 0xf4c9 0x170a8 0x18537
+TlsAlloc                           (1x): 0x1424a
+TlsFree                            (1x): 0x14293
+TlsGetValue                        (1x): 0x142db
+TlsSetValue                        (1x): 0x14324
+TranslateMessage                   (1x): 0xbbf7
+TryAcquireSRWLockExclusive         (2x): 0xea13 0xea2b
+UnhandledExceptionFilter           (3x): 0xf4b0 0xf77b 0x16ea8
+UpdateWindow                       (1x): 0xbbb9
+VirtualAllocEx                     (1x): 0x24d7
+VirtualFreeEx                      (4x): 0x257a 0x2610 0x26a5 0x2742
+VirtualProtect                     (3x): 0x1b945 0x1b976 0x1bce0
+WaitForSingleObject                (1x): 0x2712
+WakeAllConditionVariable           (2x): 0xeaa4 0xeb52
+WideCharToMultiByte                (3x): 0x4f28 0x4f7f 0x1d9bb
+WinHttpCloseHandle                 (27x): 0x391f 0x3aa2 0x3aab 0x3e31 0x3e3a 0x3e43 0x5ff3 0x6144 0x614d 0x6233 0x623c 0x6245 0x631b 0x6324 0x632d 0x64a7 0x64b0 0x64b9 0x66f1 0x66fc
+WinHttpConnect                     (2x): 0x390e 0x5fd9
+WinHttpCrackUrl                    (2x): 0x3656 0x5cf0
+WinHttpOpen                        (2x): 0x37fb 0x5edb
+WinHttpOpenRequest                 (2x): 0x3a3b 0x612f
+WinHttpQueryHeaders                (7x): 0x3b71 0x3bca 0x3c6f 0x3cfe 0x640e 0x644e 0x66af
+WinHttpReadData                    (2x): 0x6599 0x6663
+WinHttpReceiveResponse             (2x): 0x3b3c 0x630a
+WinHttpSendRequest                 (2x): 0x3b29 0x6222
+WinHttpSetOption                   (2x): 0x38da 0x5fc1
+WinHttpSetTimeouts                 (1x): 0x38f6
+WriteConsoleW                      (2x): 0x232ed 0x2335b
+WriteFile                          (8x): 0x4fa7 0x65d7 0x20b00 0x20b46 0x20cf0 0x20e0c 0x20f74 0x21366
+WriteProcessMemory                 (1x): 0x2561
+
+UNMAPPED SITES: ['0xb220', '0xb25f', '0xd40c', '0xe24d', '0xe418', '0xe8fc', '0xf039', '0xfa06', '0xfa42', '0xfa9a', '0xfaee', '0x10889', '0x109be', '0x10b47', '0x110c6', '0x112bc', '0x12b07', '0x12da7', '0x1423e', '0x14287', '0x142cf', '0x1431c', '0x1437b', '0x23c60', '0x23c80']
