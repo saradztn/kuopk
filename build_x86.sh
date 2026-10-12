@@ -67,8 +67,9 @@ echo "[*] Building bin/NRTH_audit.dll (x86-windows-gnu)..."
     -DNRTH_AUDIT_BUILD nrth_audit.cpp nrth_audit.def \
     -o bin/NRTH_audit.dll
 
-echo "[*] Building bin/csx_spoof.dll + bin/test_csx_spoof.exe (x86-windows-gnu)..."
-bash csx_spoof/build_csx_spoof.sh
+# NOTE: the standalone csx_spoof.dll / test_csx_spoof.exe build was removed;
+# csx_spoof_core.cpp is still compiled INTO NRTH.dll (Reset MTA Serial feature)
+# via csx_spoof/csx_spoof.{h,cpp}. The separate CSX deliverable no longer ships.
 
 rm -rf build_obj bin/*.lib bin/*.pdb
 echo "[+] Build complete:"

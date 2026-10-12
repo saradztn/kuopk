@@ -1461,8 +1461,94 @@ static void DrawDumper()
     ImGui::EndChild();
 }
 
+/* ===========================================================================
+ * Player list population.
+ *
+ * s_players is filled through the MTA Lua VM bridge (same channel as the
+ * Money Exploit button): a small script enumerates getElementsByType("player")
+ * inside the game and writes "Y<name>" / "N<name>" lines (Y = local player)
+ * to C:\NVX\nrth_players.txt (project file-channel convention, cf.
+ * SaveDumperEntryToDisk). C reads the file whenever the Player tab is shown
+ * and refreshes the script once per second.
+ *
+ * Line format (UTF-8, one player per line):
+ *   Y<name>   — local player
+ *   N<name>   — remote player
+ * =========================================================================== */
+static const char kPlayerListLua[] =
+"pcall(function()\n"
+"local lp=''\n"
+"local okl,lpe=pcall(getLocalPlayer)\n"
+"if okl and lpe then lp=getElementName(lpe) end\n"
+"local out={}\n"
+"for _,p in ipairs(getElementsByType('player')) do\n"
+" local n=getElementName(p)\n"
+" if n then out[#out+1]=((n==lp) and 'Y' or 'N')..n end\n"
+"end\n"
+"local data=table.concat(out,'\\n')\n"
+"local okf,f=pcall(io.open,'C:\\\\NVX\\\\nrth_players.txt','w')\n"
+"if okf and f then f:write(data) f:close() return end\n"
+"pcall(function()\n"
+" local h=fileCreate('C:\\\\NVX\\\\nrth_players.txt')\n"
+" if h then fileWrite(h,data,0) fileClose(h) end\n"
+"end)\n"
+"end)\n";
+
+static void RefreshPlayerListFromFile()
+{
+    const char *path = "C:\\NVX\\nrth_players.txt";
+    FILE *fp = fopen(path, "rb");
+    if (!fp) return;
+    fseek(fp, 0, SEEK_END);
+    long sz = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+    if (sz <= 0 || sz > 65536) { fclose(fp); return; }
+    std::string data;
+    data.resize((size_t)sz);
+    if (fread(&data[0], 1, (size_t)sz, fp) != (size_t)sz) { fclose(fp); return; }
+    fclose(fp);
+
+    std::vector<PlayerRow> next;
+    size_t pos = 0;
+    while (pos < data.size()) {
+        size_t nl = data.find('\n', pos);
+        size_t end = (nl == std::string::npos) ? data.size() : nl;
+        if (end - pos >= 2) {
+            PlayerRow r;
+            r.isYou = (data[pos] == 'Y');
+            r.name = data.substr(pos + 1, end - pos - 1);
+            if (!r.name.empty()) next.push_back(r);
+        }
+        pos = (nl == std::string::npos) ? data.size() : nl + 1;
+    }
+    if (next.empty()) return; /* partial/empty write — keep previous list */
+    int keep = -1;
+    if (s_playerSel >= 0 && s_playerSel < (int)s_players.size())
+        for (int i = 0; i < (int)next.size(); ++i)
+            if (next[i].name == s_players[s_playerSel].name) { keep = i; break; }
+    s_players.swap(next);
+    s_playerSel = (keep >= 0) ? keep : 0;
+}
+
+static void PlayerListTick()
+{
+    /* Ensure the file-channel directory exists (MTA io.open will not create it).
+     * Idempotent — matches the C:\NVX convention used by SaveDumperEntryToDisk. */
+    CreateDirectoryA("C:\\NVX", NULL);
+
+    double now = ImGui::GetTime();
+    static double s_lastWrite = -1e9; /* force an immediate first write */
+    if (now - s_lastWrite >= 1.0) {
+        s_lastWrite = now;
+        NrthUI_ExecuteLuaViaBridge(kPlayerListLua, sizeof(kPlayerListLua) - 1, 0);
+    }
+    RefreshPlayerListFromFile();
+}
+
 static void DrawPlayerTab()
 {
+    PlayerListTick();
+    if (s_playerSel >= (int)s_players.size()) s_playerSel = 0;
     ImGui::InputTextWithHint("##player_filter", L("filter...", "فلتر..."),
                              s_playerFilterBuf, sizeof(s_playerFilterBuf));
     ImGui::SetNextItemWidth(280);
@@ -1474,7 +1560,8 @@ static void DrawPlayerTab()
             std::string lbl = s_players[i].name + (s_players[i].isYou ? std::string(" (") + L("you", "أنت") + ")" : "");
             if (ImGui::Selectable(lbl.c_str(), s_playerSel == i)) s_playerSel = i;
         }
-        if (s_players.empty()) ImGui::TextDisabled("%s", L("No players found", "لا لاعبين"));
+        if (s_players.empty())
+            ImGui::TextDisabled("%s", L("No players found (list refreshes automatically)", "لا لاعبين (القائمة تتحدث تلقائياً)"));
         ImGui::EndCombo();
     }
     if (ImGui::Button(L("Teleport", "تنقل"))) FeatureAction(L("Teleport", "تنقل"));
